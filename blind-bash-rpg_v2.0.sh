@@ -66,18 +66,7 @@ function _OPEN_GAME () {
 		POCOES=$(cat $conf | grep "POCOES" | cut -d "=" -f 2 | tr -d " ")
 		HP_NOW=$(cat $conf | grep "HP_NOW" | cut -d "=" -f 2 | tr -d " ")
 		HP_MAX=$(cat $conf | grep "HP_MAX" | cut -d "=" -f 2 | tr -d " ")
-		_CABECALHO
-		let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
-		NARRA="
-Você, $NOME, está no nível $NIVEL com a saúde em ${HP_PERCENT}%. 
-Abriu sua mochila e contou $POCOES poções de cura. 
-Retirou o mapa do bolso.
-Leu suas anotações enquanto explorava o calabouço.
-Descobriu que está no andar $ANDAR. 
-		"
-		#echo $NARRA
-		#doFala "$NARRA" "op"
-		doFala "$NARRA" -p "$NARRA" -op "op"
+		_AUTOEXAME
 		_CAUMA
 	else
 		_CABECALHO
@@ -185,8 +174,9 @@ O que você irá fazer?
 	(2) Autoexaminar-se;
 	(3) Coletar o que encontrou;
 	(4) Beber uma poção de cura;
-	(5) Salvar o jogo;
-	(6) Desistir da missão;
+	(5) Descer a escadaria;
+	(6) Salvar o jogo;
+	(7) Desistir da missão;
 	"
 	#echo "$NARRA"
 	#doFala "$NARRA" "op"
@@ -197,12 +187,14 @@ O que você irá fazer?
 	elif [ "$op" == "2" ]; then
 		_AUTOEXAME
 	elif [ "$op" == "3" ]; then
-		_TAKEALL
+		_POTION_TAKE
 	elif [ "$op" == "4" ]; then
-		_CURAR
+		_POTION_USE
 	elif [ "$op" == "5" ]; then
-		_SAVE_GAME
+		_STAIR_DOWN
 	elif [ "$op" == "6" ]; then
+		_SAVE_GAME
+	elif [ "$op" == "7" ]; then
 		_OFFMISSION
 	else
 		_CAUMA
@@ -286,12 +278,28 @@ function doFala () {
 	fi
 }
 #----------------------------------------------------------------------
+function _AUTOEXAME () {
+	_CABECALHO
+	let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
+	NARRA="
+Você, $NOME, está no nível $NIVEL com a saúde em ${HP_PERCENT}%. 
+Abriu sua mochila e contou $POCOES poções de cura. 
+Retirou o mapa do bolso.
+Leu suas anotações enquanto explorava o calabouço.
+Descobriu que está no andar $ANDAR. 
+	"
+	#echo $NARRA
+	#doFala "$NARRA" "op"
+	doFala "$NARRA" -p "$NARRA" -op "op"
+
+}
+#----------------------------------------------------------------------
 function _EXPLORAR () {
 	SORT_ATACK=$(( $RANDOM % 100 ))
 	if [ ( $SORT_ATACK -lt $(( 11 - $ANDAR )) ) && ( $SORT_ATACK -gt 0 ) ]; then
 		NARRA="Um monstro te encontrou."
 		doFala "$NARRA" -p "$NARRA" -op "op"
-		_SOB_ATACK
+		_COMBATER
 	fi
 	if [ "$IF_POTION_FOUND" == "1" ]; then
 		IF_POTION_FOUND=0
@@ -316,16 +324,40 @@ function _EXPLORAR () {
 	_CAUMA
 }
 #----------------------------------------------------------------------
+function _POTION_TAKE () {
+	if [ "$IF_POTION_FOUND" == "1" ]; then
+		IF_POTION_FOUND=0
+		POCOES=$(( $POCOES + 1 ))
+		NARRA="Você coletou a porção que encontrou."
+		doFala "$NARRA" -p "$NARRA" -op "op"
+	else
+		NARRA="Aqui não tem nada para você coletar."
+		doFala "$NARRA" -p "$NARRA" -op "op"	
+	fi
+}
+#----------------------------------------------------------------------
 function _POTION_FOUND () {
 	IF_POTION_FOUND=1
 	NARRA="Você encontrou um frasco de poção de cura."
 	doFala "$NARRA" -p "$NARRA" -op "op"
 }
 #----------------------------------------------------------------------
-function _STAIR_FOUND () 
+function _STAIR_FOUND () {
 	IF_STAIR_FOUND=1
 	NARRA="Você encontrou a escada que levará ao andar abaixo."
 	doFala "$NARRA" -p "$NARRA" -op "op"
+}
+#----------------------------------------------------------------------
+function _STAIR_DOWN () {
+	if [ "$IF_STAIR_FOUND" == "1" ]; then
+		IF_STAIR_FOUND=0
+		ANDAR=$(( $ANDAR + 1 ))
+		NARRA="Você desceu pelas escadas que encontrou até o ${ANDAR}º andar."
+		doFala "$NARRA" -p "$NARRA" -op "op"
+	else
+		NARRA="Aqui não tem nenhuma escada ou corda para você descer."
+		doFala "$NARRA" -p "$NARRA" -op "op"	
+	fi	
 }
 #----------------------------------------------------------------------
 _OPEN_CONF
