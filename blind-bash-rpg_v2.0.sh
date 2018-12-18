@@ -21,9 +21,6 @@ function _OPEN_CONF () {
 		#echo $FILE_BASE
 		#read -n 1
 	fi
-	
-	#FILE_SAVE="BlindBashRPG.sav"
-	#FILE_CONF="BlindBashRPG.conf"
 	conf="${FILE_BASE}${FILE_CONF}"
 	if [ -f $conf ]; then
 		NARRADOR=$(cat $conf | grep "NARRADOR" | cut -d "=" -f 2 | tr -d " ")
@@ -72,12 +69,9 @@ function _OPEN_GAME () {
 	else
 		_CABECALHO
 		NARRA="NÃO EXISTE JOGO SALVO!"
-		##echo $NARRA
 		if [ "$NARRADOR" == "ATIVADO" ]; then
-			#doFala "$NARRA" 
 			doFala "$NARRA" -p "$NARRA"
 		else
-			#doFala "$NARRA" "op"
 			doFala "$NARRA" -p "$NARRA" -op "op"
 		fi
 		_MAIN
@@ -99,9 +93,7 @@ Selecione uma opção do menu principal:
 	(5) Configurar Jogo;
 	(6) Sair do Jogo;
 	"
-	#echo "$NARRA"
 	doFala "$NARRA" -p "$NARRA" -op "op"
-	#read -n 1 -p ">>> " op
 	if [ "$op" == "1" ]; then 
 		_NOVO;
 	elif [ "$op" == "2" ]; then 
@@ -147,10 +139,7 @@ function _NOVO () {
 	HP_NOW=100
 	_CABECALHO
 	NARRA="Digite seu nome: "
-	#printf "$NARRA"
-	#doFala "$NARRA"
 	doFala "$NARRA" -p "$NARRA" -val "NOME"
-	#read -p ">>> " NOME
 	NOME=$(echo "$NOME" | cut -d " " -f 1)
 	_INIT
 }
@@ -186,8 +175,6 @@ function _DELELOPER_CREDITS () {
 	
 	* Lunovox Heavenfinder. Contattos em: https://libreplanet.org/wiki/User:Lunovox
 	"
-	#echo "$NARRA"
-	#doFala "$NARRA" "op"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	_MAIN
 }
@@ -237,10 +224,7 @@ O que você irá fazer?
 	(7) Desistir da missão;
 	"
 	NARRA=$(( echo -e "$NARRA" ))
-	#echo "$NARRA"
-	#doFala "$NARRA" "op"
 	doFala "$NARRA" -p "$NARRA" -op "op"
-	#read -n 1 -p ">>> " op
 	if [ "$op" == "1" ]; then
 		_EXPLORAR
 	elif [ "$op" == "2" ]; then
@@ -266,8 +250,6 @@ function _OFFMISSION () {
 Você acha que já desceu demais, e não quer chegar do outro lado desta bandeija chamada 'planeta'. 
 Então, resolve desistir da missão e voltar para a superfície.
 	"
-	#echo "$NARRA"
-	#doFala "$NARRA"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	_MAIN
 }
@@ -312,7 +294,6 @@ function doFala () {
 		echo -e "$newprint"
 	fi
 	if [ -n "$newop" ]; then
-		#echo "newop=$newop"
 		if [ "$NARRADOR" == "ATIVADO" ]; then
 			pkill 'espeak' > /dev/null
 			fala=$(( echo -e "$1" ))
@@ -320,7 +301,6 @@ function doFala () {
 		fi
 		read -n 1 -p ">>> " $newop
 	elif [ -n "$newval" ]; then
-		#echo "newval=$newval"
 		if [ "$NARRADOR" == "ATIVADO" ]; then
 			pkill 'espeak' > /dev/null
 			fala=$(( echo -e "$1" ))
@@ -346,8 +326,6 @@ Retirou um papel em seu bolso.
 Leu suas anotações enquanto explorava o calabouço.
 Descobriu que está no andar $ANDAR. 
 	"
-	#echo $NARRA
-	#doFala "$NARRA" "op"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 
 }
