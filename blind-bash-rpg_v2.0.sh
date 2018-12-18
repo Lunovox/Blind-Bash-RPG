@@ -324,25 +324,27 @@ function _EXPLORAR () {
 		NARRA="Um monstro te encontrou."
 		doFala "$NARRA" -p "$NARRA" -op "op"
 		_COMBATER
-	fi
-	if [ "$IF_POTION_FOUND" == "1" ]; then
-		IF_POTION_FOUND=0
-		NARRA="Ao continuar a explorar este andar, você esqueceu uma poção de cura para traz."
+	elif [ "$IF_POTION_FOUND" == "1" || "$IF_STAIR_FOUND" == "1" ]; then
+		NARRA="Você continua e explorar outra sala. Por isso... "
+		if [ "$IF_POTION_FOUND" == "1" ]; then
+			IF_POTION_FOUND=0
+			NARRA="$NARRA Esqueceu uma poção de cura para traz."
+		fi
+		if [ "$IF_STAIR_FOUND" == "1" ]; then
+			IF_STAIR_FOUND=0
+			NARRA="$NARRA Esqueceu a localização da porta que estava aberta."
+		fi
 		doFala "$NARRA" -p "$NARRA" -op "op"
 	else
 		SORT_POTION=$(( $RANDOM % 100 ))
+		SORT_STAIR=$(( $RANDOM % 100 ))
 		if [ ( $SORT_POTION -lt $(( 11 - $ANDAR )) ) && ( $SORT_POTION -gt 0 ) ]; then
 			_POTION_FOUND
-		fi
-	fi
-	if [ "$IF_STAIR_FOUND" == "1" ]; then
-		IF_STAIR_FOUND=0
-		NARRA="Ao continuar a explorar este andar, você esqueceu a localização de onde está a escada para desce."
-		doFala "$NARRA" -p "$NARRA" -op "op"
-	else
-		SORT_STAIR=$(( $RANDOM % 100 ))
-		if [ ( $SORT_STAIR -lt 5 ) && ( $SORT_STAIR -gt 0 ) ]; then
+		elif [ ( $SORT_STAIR -lt 5 ) && ( $SORT_STAIR -gt 0 ) ]; then
 			_STAIR_FOUND
+		else
+			NARRA="Você explora a sala, mas nada está chamando a sua atenção."
+			doFala "$NARRA" -p "$NARRA" -op "op"	
 		fi
 	fi
 	_CAUMA
