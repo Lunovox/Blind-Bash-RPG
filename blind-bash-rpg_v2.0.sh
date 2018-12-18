@@ -180,10 +180,20 @@ function _DELELOPER_CREDITS () {
 function _INIT () {
 	_CABECALHO
 	echo -e "DIFICULDADE: $DIFICULDADE\n\n"
+	NARRA="Você estava dormindo enquanto viajava de trem."
+	doFala "$NARRA" -p "$NARRA" -op "op"
+
+	sl
+	_CABECALHO
+	echo -e "DIFICULDADE: $DIFICULDADE\n\n"
 	NARRA="
-	A esposa do prefeito da cidade 'Crâneo-Rachado' foi raptada por Ogros. 
-	Por isso, você, $NOME, foi convocado ou convocada para salvar a madame.
-	Você desce por uma escadaria em um andar no subsolo escuro.
+	Ao acorda percebeu que o tem estava parado dentro de um galpão trancado e escuro.
+	Você, $NOME, não sabe por que está trancado aqui, mas deseja saber onde está."
+	doFala "$NARRA" -p "$NARRA" -op "op"
+
+	_CABECALHO
+	NARRA="
+	Você escuta um grito de mulher em agonia que vem de algum lugar.
 	"
 	#echo "$NARRA"
 	#doFala "$NARRA" "op"
@@ -294,20 +304,23 @@ function doFala () {
 		#echo "newop=$newop"
 		if [ "$NARRADOR" == "ATIVADO" ]; then
 			pkill 'espeak' > /dev/null
-			espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "$1" &
+			fala=$(( echo -e "$1" ))
+			espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "$fala" &
 		fi
 		read -n 1 -p ">>> " $newop
 	elif [ -n "$newval" ]; then
 		#echo "newval=$newval"
 		if [ "$NARRADOR" == "ATIVADO" ]; then
 			pkill 'espeak' > /dev/null
-			espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "$1" &
+			fala=$(( echo -e "$1" ))
+			espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "$fala" &
 		fi
 		read -p ">>> " $newval
 	else
 		if [ "$NARRADOR" == "ATIVADO" ]; then
 			pkill 'espeak' > /dev/null
-			espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "$1"
+			fala=$(( echo -e "$1" ))
+			espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "$fala"
 		fi
 	fi
 }
@@ -411,13 +424,21 @@ function _STAIR_DOWN () {
 #----------------------------------------------------------------------
 function _CHECK_DEPENDENCIES () {
 	if ! foobar_loc="$(type -p 'figlet')" || [ -z "figlet" ]; then
-		# install foobar here
 		echo "comando 'figlet' não encontrado!"
 		echo "Favor digite: sudo apt-get install figlet"
 		exit 0
 	fi
+	if ! foobar_loc="$(type -p 'sl')" || [ -z "sl" ]; then
+		echo "comando 'sl' não encontrado!"
+		echo "Favor digite: sudo apt-get install sl"
+		exit 0
+	fi
 	if ! foobar_loc="$(type -p 'espeak')" || [ -z "espeak" ]; then
-		# install foobar here
+		echo "comando 'espeak' não encontrado!"
+		echo "Favor digite: sudo apt-get install espeak"
+		exit 0
+	fi
+	if ! foobar_loc="$(type -p 'espeak')" || [ -z "espeak" ]; then
 		echo "comando 'espeak' não encontrado!"
 		echo "Favor digite: sudo apt-get install espeak"
 		exit 0
