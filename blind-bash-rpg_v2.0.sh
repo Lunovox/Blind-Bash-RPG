@@ -384,6 +384,28 @@ function _STAIR_DOWN () {
 	fi	
 }
 #----------------------------------------------------------------------
+function _CHECK_DEPENDENCIES () {
+	if ! foobar_loc="$(type -p 'figlet')" || [ -z "figlet" ]; then
+		# install foobar here
+		echo "comando 'figlet' não encontrado!"
+		echo "Favor digite: sudo apt-get install figlet"
+		exit 0
+	fi
+	if ! foobar_loc="$(type -p 'espeak')" || [ -z "espeak" ]; then
+		# install foobar here
+		echo "comando 'espeak' não encontrado!"
+		echo "Favor digite: sudo apt-get install espeak"
+		exit 0
+	fi
+	if ! foobar_loc="$(type -p 'paplay')" || [ -z "paplay" ]; then
+		# install foobar here
+		echo "comando 'paplay' não encontrado!"
+		echo "Favor digite: sudo apt-get install paplay"
+		exit 0
+	fi
+}
+#----------------------------------------------------------------------
+_CHECK_DEPENDENCIES
 _OPEN_CONF
 	#_CABECALHO
 	#doFala "Jogo 'Blind Bash RPG' versão dois ponto zero..."
