@@ -150,7 +150,7 @@ function _NOVO () {
 	NIVEL=1
 	POCOES=0
 	HP_MAX=100
-	HP=100
+	HP_NOW=100
 	_CABECALHO
 	NARRA="Digite seu nome: "
 	#printf "$NARRA"
