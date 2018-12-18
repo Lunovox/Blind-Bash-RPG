@@ -96,8 +96,9 @@ Selecione uma opção do menu principal:
 	${LOADTEXT}
 	(3) Narrador: '$NARRADOR';
 	(4) Dificuldade: '$DIFICULDADE';
-	(5) Lista de Desenvolvedores;
-	(6) Sair do Jogo;
+	(5) Listar Conquistas;
+	(6) Listar Desenvolvedores;
+	(7) Sair do Jogo;
 	"
 	#echo "$NARRA"
 	doFala "$NARRA" -p "$NARRA" -op "op"
@@ -111,8 +112,10 @@ Selecione uma opção do menu principal:
 	elif [ "$op" == "4" ]; then 
 		_CHANGE_DIFFICULTY
 	elif [ "$op" == "5" ]; then 
-		_DELELOPER_CREDITS
+		_SHOW_ACHIEVEMENTS
 	elif [ "$op" == "6" ]; then 
+		_DELELOPER_CREDITS
+	elif [ "$op" == "7" ]; then 
 		_SAIRDOJOGO	
 	fi
 	_MAIN
