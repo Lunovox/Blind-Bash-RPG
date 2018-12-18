@@ -96,7 +96,8 @@ Selecione uma opção do menu principal:
 	${LOADTEXT}
 	(3) Narrador: '$NARRADOR';
 	(4) Dificuldade: '$DIFICULDADE';
-	(5) Sair do Jogo;
+	(5) Lista de Desenvolvedores;
+	(6) Sair do Jogo;
 	"
 	#echo "$NARRA"
 	doFala "$NARRA" -p "$NARRA" -op "op"
@@ -128,6 +129,8 @@ Selecione uma opção do menu principal:
 		fi
 		_MAIN;
 	elif [ "$op" == "5" ]; then 
+		_CREDITOS
+	elif [ "$op" == "6" ]; then 
 		_SAIRDOJOGO
 	else
 		_MAIN
@@ -174,7 +177,7 @@ O que você irá fazer?
 	(2) Autoexaminar-se;
 	(3) Coletar o que encontrou;
 	(4) Beber uma poção de cura;
-	(5) Descer a escadaria;
+	(5) Descer ao andar inferior;
 	(6) Salvar o jogo;
 	(7) Desistir da missão;
 	"
