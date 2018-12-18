@@ -1,14 +1,17 @@
 #!/bin/bash
 #source incl.sh
 
-NARRADOR="ATIVADO"
-DIFICULDADE="NORMAL"
 FILE_BASE="${HOME}/.config/BlindBashRPG/"
 FILE_SAVE="BlindBashRPG.sav"
 FILE_CONF="BlindBashRPG.conf"
+#ESPEAK_CONF="-v pt+f5 -p 60 -a 100 -s 165 -g 10"
+ESPEAK_CONF="-v pt+f2 -p 60 -a 100 -s 165 -g 10"
 NOME=""
 ANDAR=1
 NIVEL=1
+EXPERIENCE=0
+NARRADOR="ATIVADO"
+DIFICULDADE="NORMAL"
 POCOES=0
 HP_MAX=100
 HP_NOW=100
@@ -43,8 +46,10 @@ function _SAVE_GAME () {
 	echo "
 #-------------------
 NOME = ${NOME}
+DIFICULDADE = ${DIFICULDADE}
 ANDAR = ${ANDAR}
 NIVEL = ${NIVEL}
+EXPERIENCE = ${EXPERIENCE}
 POCOES = ${POCOES}
 HP_NOW = ${HP_NOW}
 HP_MAX = ${HP_MAX}
@@ -59,8 +64,10 @@ function _OPEN_GAME () {
 	conf="${FILE_BASE}${FILE_SAVE}"
 	if [ -f $conf ]; then
 		NOME=$(cat $conf | grep "NOME" | cut -d "=" -f 2 | tr -d " ")
+		DIFICULDADE=$(cat $conf | grep "DIFICULDADE" | cut -d "=" -f 2 | tr -d " ")
 		ANDAR=$(cat $conf | grep "ANDAR" | cut -d "=" -f 2 | tr -d " ")
 		NIVEL=$(cat $conf | grep "NIVEL" | cut -d "=" -f 2 | tr -d " ")
+		EXPERIENCE=$(cat $conf | grep "EXPERIENCE" | cut -d "=" -f 2 | tr -d " ")
 		POCOES=$(cat $conf | grep "POCOES" | cut -d "=" -f 2 | tr -d " ")
 		HP_NOW=$(cat $conf | grep "HP_NOW" | cut -d "=" -f 2 | tr -d " ")
 		HP_MAX=$(cat $conf | grep "HP_MAX" | cut -d "=" -f 2 | tr -d " ")
@@ -82,16 +89,16 @@ function _MAIN () {
 	_CABECALHO
 	LOADTEXT=""
 	if [ -f "${FILE_BASE}${FILE_SAVE}" ]; then 
-		LOADTEXT="\n\t(2) Carregar Jogo;"; 
+		LOADTEXT="\n\t(2) CARREGAR JOGO;"; 
 	fi
 	NARRA="
 Selecione uma opção do menu principal:
 
-	(1) Novo Jogo; ${LOADTEXT}
-	(3) Listar Conquistas;
-	(4) Listar Desenvolvedores;
-	(5) Configurar Jogo;
-	(6) Sair do Jogo;
+	(1) NOVO JOGO EM $DIFICULDADE; ${LOADTEXT}
+	(3) LISTAR CONQUISTAS;
+	(4) DESENVOLVEDORES;
+	(5) CONFIGURAÇÕES;
+	(6) SAIR DO JOGO;
 	"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	if [ "$op" == "1" ]; then 
@@ -148,7 +155,7 @@ function _TOGGLE_NARRATOR () {
 	if [ "$NARRADOR" == "ATIVADO" ]; then
 		NARRADOR="DESATIVADO"
 		pkill 'espeak' > /dev/null
-		espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "O narrador do jogo agora está '$NARRADOR'."
+		espeak $ESPEAK_CONF "O narrador do jogo agora está '$NARRADOR'."
 	else
 		NARRADOR="ATIVADO"
 	fi
@@ -171,9 +178,10 @@ function _CHANGE_DIFFICULTY () {
 function _DELELOPER_CREDITS () {
 	_CABECALHO
 	NARRA="
-	O jogo foi desenvolvido por...
-	
-	* Lunovox Heavenfinder. Contattos em: https://libreplanet.org/wiki/User:Lunovox
+O jogo foi desenvolvido por...
+
+	. Lunovox Heavenfinder. 
+			Contatos em: https://libreplanet.org/wiki/User:Lunovox
 	"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	_MAIN
@@ -181,16 +189,14 @@ function _DELELOPER_CREDITS () {
 #----------------------------------------------------------------------
 function _INIT () {
 	_CABECALHO
-	echo -e "DIFICULDADE: $DIFICULDADE\n\n"
 	NARRA="Você, $NOME, estava dormindo enquanto viajava de trem até a estação em sua casa."
 	doFala "$NARRA" -p "$NARRA" -op "op"
 
 	sl
 	
 	_CABECALHO
-	echo -e "DIFICULDADE: $DIFICULDADE\n\n"
 	NARRA="
-	Ao acorda percebeu que o tem estava parado dentro de um galpão trancado e escuro.
+	Após acordar, percebe que o trem está parado dentro de um galpão trancado e escuro.
 	Você não sabe por que está trancado aqui, mas deseja saber onde está e o porquê de está aqui."
 	doFala "$NARRA" -p "$NARRA" -op "op"
 
@@ -204,12 +210,11 @@ function _INIT () {
 }
 #----------------------------------------------------------------------
 function _CAUMA () {
-	_CABECALHO
 	MENU_ADD=""
-	if [ "$IF_POTION_FOUND" == "1" ]; then
-		MENU_ADD="$MENU_ADD \n\t(3) Coletar o que encontrou;"
+	if [[ $IF_POTION_FOUND -ge 1 ]]; then
+		MENU_ADD="$MENU_ADD \n\t(3) Guardar as $IF_POTION_FOUND poções que encontrou;"
 	fi
-	if [ $POCOES -gt 0 ]; then
+	if [[ $POCOES -ge 1 && $HP_NOW -lt $HP_MAX ]]; then
 		MENU_ADD="$MENU_ADD \n\t(4) Beber uma poção de cura;"
 	fi
 	if [ "$IF_STAIR_FOUND" == "1" ]; then
@@ -221,9 +226,10 @@ O que você irá fazer?
 	(1) Explorar o local;
 	(2) Autoexaminar-se; $MENU_ADD
 	(6) Salvar o jogo;
-	(7) Desistir da missão;
+	(7) Dormir um pouco;
 	"
-	NARRA=$(( echo -e "$NARRA" ))
+	#NARRA=$((printf $NARRA))
+	_CABECALHO
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	if [ "$op" == "1" ]; then
 		_EXPLORAR
@@ -239,16 +245,22 @@ O que você irá fazer?
 		_SAVE_GAME
 	elif [ "$op" == "7" ]; then
 		_OFFMISSION
-	else
-		_CAUMA
 	fi
+	_CAUMA
 }
 #----------------------------------------------------------------------
 function _OFFMISSION () {
-	_CABECALHO
+	#_CABECALHO
+	clear
+	echo -e "\n\n\n"
+	figlet "GAME OVER"
+	echo -e "\n\n"
 	NARRA="
-Você acha que já desceu demais, e não quer chegar do outro lado desta bandeija chamada 'planeta'. 
-Então, resolve desistir da missão e voltar para a superfície.
+Você está muito cansado e resolve se deitar no chão para dormir um pouco.
+Seu descuido lhe custou a vida. 
+Pois ao acordar você percebe que está completamente amarrado e cozinhando dentro de um caldeirão. 
+
+Isto é o fim de jogo para você...
 	"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	_MAIN
@@ -267,7 +279,7 @@ function _SAIRDOJOGO () {
 	_SAVE_CONF
 	_CABECALHO
 	NARRA="Obrigado por jogar 'Blind Bash RPG'!"
-	doFala "$NARRA" -p "$NARRA" -op "op"
+	doFala "$NARRA" -p "$NARRA"
 	clear
 	exit;
 }
@@ -292,26 +304,29 @@ function doFala () {
 	#echo "newprint=$newprint"
 	if [ -n "$newprint" ]; then
 		echo -e "$newprint"
+		if [[ "$newop" == "" && "$newval" == "" ]]; then
+			newop="op" #Força para de teclado de houve texto impresso
+		fi
 	fi
 	if [ -n "$newop" ]; then
 		if [ "$NARRADOR" == "ATIVADO" ]; then
 			pkill 'espeak' > /dev/null
-			fala=$(( echo -e "$1" ))
-			espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "$fala" &
+			fala=$(echo -e $1)
+			espeak $ESPEAK_CONF "$fala" &
 		fi
 		read -n 1 -p ">>> " $newop
 	elif [ -n "$newval" ]; then
 		if [ "$NARRADOR" == "ATIVADO" ]; then
 			pkill 'espeak' > /dev/null
-			fala=$(( echo -e "$1" ))
-			espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "$fala" &
+			fala=$(echo -e "$1")
+			espeak $ESPEAK_CONF "$fala" &
 		fi
 		read -p ">>> " $newval
 	else
 		if [ "$NARRADOR" == "ATIVADO" ]; then
 			pkill 'espeak' > /dev/null
-			fala=$(( echo -e "$1" ))
-			espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "$fala"
+			fala=$(echo -e "$1")
+			espeak $ESPEAK_CONF "$fala"
 		fi
 	fi
 }
@@ -319,95 +334,166 @@ function doFala () {
 function _AUTOEXAME () {
 	_CABECALHO
 	let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
-	NARRA="
-Você, $NOME, está no nível $NIVEL com a saúde em ${HP_PERCENT}%. 
-Abriu sua mochila e contou $POCOES poções de cura. 
-Retirou um papel em seu bolso.
-Leu suas anotações enquanto explorava o calabouço.
-Descobriu que está no andar $ANDAR. 
-	"
-	doFala "$NARRA" -p "$NARRA" -op "op"
+	#HP_PERCENT=$( $HP_NOW * 100 / $HP_MAX )
+	
+	NARRA="Você, $NOME, está com a saúde em ${HP_PERCENT}%."
+	if [[ $POCOES -ge 1 ]]; then
+		NARRA="$NARRA \nAbriu sua mochila e contou $POCOES poções de cura."
+	fi
+	
+	NARRA="$NARRA \nRetirou um papel em seu bolso. Leu suas anotações enquanto explorava o calabouço."
 
+	if [[ $NIVEL -ge 2 || $ANDAR -ge 2 ]]; then
+		NARRA="$NARRA \nDescobriu que está com o nível de força $NIVEL enquanto está na ${ANDAR}ª fase."
+	fi
+
+	NARRA="$NARRA \nVocê sabe o quanto este local é perigoso com a dificuldade '${DIFICULDADE}'."
+	NARRA="$NARRA \nPor isso que precisa sair daqui o quanto antes."
+	let NEXT_NIVEL_XP="$NIVEL * 5"
+	
+	echo -e "$NARRA\n\n"
+	echo $x{0..75}"-"|tr -d ' '
+	echo -e "HP: ${HP_NOW}/${HP_MAX} (${HP_PERCENT}%) | XP: ${EXPERIENCE}/${NEXT_NIVEL_XP} | NÍVEL: ${NIVEL} | FASE: ${ANDAR} | DIFICULDADE: ${DIFICULDADE}"
+	echo $x{0..75}"-"|tr -d ' '
+	doFala "$NARRA"  -op "op"
 }
 #----------------------------------------------------------------------
 function _EXPLORAR () {
-	SORT_ATACK=$(( $RANDOM % 100 ))
-	if [ ( $SORT_ATACK -lt $(( 11 - $ANDAR )) ) && ( $SORT_ATACK -gt 0 ) ]; then
-		NARRA="Um monstro te encontrou."
-		doFala "$NARRA" -p "$NARRA" -op "op"
+	_CABECALHO
+	SORT_ATACK=$(($RANDOM % 100))
+	if [[ ( $SORT_ATACK -ge 0 ) && ( $SORT_ATACK -le $(( 19 + $ANDAR )) ) ]]; then
+		clear
 		_COMBATER
-	elif [ "$IF_POTION_FOUND" == "1" || "$IF_STAIR_FOUND" == "1" ]; then
-		NARRA="Você continua e explorar outra sala. Por isso... "
-		if [ "$IF_POTION_FOUND" == "1" ]; then
-			IF_POTION_FOUND=0
-			NARRA="$NARRA Esqueceu uma poção de cura para traz."
-		fi
-		if [ "$IF_STAIR_FOUND" == "1" ]; then
-			IF_STAIR_FOUND=0
-			NARRA="$NARRA Esqueceu a localização da porta que estava aberta."
-		fi
-		doFala "$NARRA" -p "$NARRA" -op "op"
+#	elif [[ "$IF_POTION_FOUND" == "1" || "$IF_STAIR_FOUND" == "1" ]]; then
+#		NARRA="Você continua a explorar outro local. Por isso... "
+#		if [ "$IF_POTION_FOUND" == "1" ]; then
+#			IF_POTION_FOUND=0
+#			NARRA="$NARRA Esqueceu uma poção de cura para traz."
+#		fi
+#		if [ "$IF_STAIR_FOUND" == "1" ]; then
+#			IF_STAIR_FOUND=0
+#			NARRA="$NARRA Esqueceu a localização da porta que estava aberta."
+#		fi
+#		doFala "$NARRA" -p "$NARRA"
 	else
-		SORT_POTION=$(( $RANDOM % 100 ))
-		SORT_STAIR=$(( $RANDOM % 100 ))
-		if [ ( $SORT_POTION -lt $(( 11 - $ANDAR )) ) && ( $SORT_POTION -gt 0 ) ]; then
+		SORT_POTION=$(($RANDOM % 100))
+		SORT_STAIR=$(($RANDOM % 100))
+		#echo "SORT_ATACK=$SORT_ATACK | SORT_POTION=$SORT_POTION | SORT_STAIR=$SORT_STAIR"
+		#echo "IF_POTION_FOUND=$IF_POTION_FOUND | IF_STAIR_FOUND=$IF_STAIR_FOUND"		
+		#echo -e "\n\n"
+		if [[ $SORT_POTION -ge 0 && $SORT_POTION -le $((16 - $ANDAR)) ]]; then
 			_POTION_FOUND
-		elif [ ( $SORT_STAIR -lt 5 ) && ( $SORT_STAIR -gt 0 ) ]; then
+		elif [[ $IF_STAIR_FOUND -eq 0 && $SORT_STAIR -ge 0 && $SORT_STAIR -le 10 ]]; then
 			_STAIR_FOUND
 		else
-			NARRA="Você explora a sala."
+			NARRA=""
 			SORT_OBJECT=$(( $RANDOM % 5 ))
 			if [ "$SORT_OBJECT" == "1" ]; then
-				NARRA="$NARRA Encontra apenas um jarro quebrado."
+				NARRA="$NARRA Encontra um jarro quebrado que indica que houve uma fuga desesperada."
 			elif [ "$SORT_OBJECT" == "2" ]; then
-				NARRA="$NARRA Encontra no chão alguns ossos humanos."
+				NARRA="$NARRA Encontra no chão alguns ossos humanos que indica que houve uma luta."
 			elif [ "$SORT_OBJECT" == "3" ]; then
-				NARRA="$NARRA Encontra uma porta de jaula trancada."
+				NARRA="$NARRA Encontra uma porta de jaula trancada que impede você de sair."
 			elif [ "$SORT_OBJECT" == "4" ]; then
-				NARRA="$NARRA Encontra um baú trancado por magia ancestral."
+				NARRA="$NARRA Encontra um baú trancado por magia que você não pode abrir."
 			elif [ "$SORT_OBJECT" == "5" ]; then
-				NARRA="$NARRA Encontra um marca de sangue no chão."
+				NARRA="$NARRA Encontra um marca de sangue no chão que te deixa mais assustado."
+			else
+				NARRA="$NARRA Nada aqui é de seu interesse."
 			fi
-			NARRA="$NARRA Nada aqui é de seu interesse."
-			doFala "$NARRA" -p "$NARRA" -op "op"	
+			doFala "$NARRA" -p "$NARRA"
 		fi
 	fi
 	_CAUMA
 }
 #----------------------------------------------------------------------
+function _COMBATER () {
+	_CABECALHO
+	let HP_NOW="$HP_NOW - ($ANDAR * 2) - 3"
+	let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
+
+	NARRA="Um monstro te encontrou."
+	doFala "$NARRA" -p "$NARRA"
+
+	NARRA="O Monstro desfere um ataque contra você. E te acerta! Sua saúde está em ${HP_PERCENT}%"
+	doFala "$NARRA" -p "$NARRA"
+	
+	NARRA="Você mata o monstro!"
+	doFala "$NARRA" -p "$NARRA"
+
+	let EXPERIENCE="$EXPERIENCE + $ANDAR"
+	let NEXT_NIVEL_XP="$NIVEL * 5"
+	if [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; then
+		let NIVEL="$NIVEL + 1"
+		let HP_MAX="100 + (($NIVEL -1) * 5)"
+		HP_NOW="$HP_MAX"
+		clear
+		echo -e "\n\n\n"
+		figlet "LEVEL UP"
+		echo -e "\n\n\n"
+		NARRA="Parabéns! Você evoluiu para o nível $NIVEL!"
+		doFala "$NARRA" -p "$NARRA"
+	fi
+}
+#----------------------------------------------------------------------
 function _POTION_TAKE () {
-	if [ "$IF_POTION_FOUND" == "1" ]; then
+	_CABECALHO
+	if [[ $IF_POTION_FOUND -ge 1 ]]; then
+		#POCOES=$(( $POCOES + 1 ))
+		let POCOES="$POCOES + $IF_POTION_FOUND"
+		NARRA="Você coletou $IF_POTION_FOUND porção que encontrou."
+		doFala "$NARRA" -p "$NARRA"
 		IF_POTION_FOUND=0
-		POCOES=$(( $POCOES + 1 ))
-		NARRA="Você coletou a porção que encontrou."
-		doFala "$NARRA" -p "$NARRA" -op "op"
 	else
 		NARRA="Aqui não tem nada para você coletar."
-		doFala "$NARRA" -p "$NARRA" -op "op"	
+		doFala "$NARRA" -p "$NARRA"
 	fi
 }
 #----------------------------------------------------------------------
 function _POTION_FOUND () {
-	IF_POTION_FOUND=1
-	NARRA="Você encontrou um frasco de poção de cura."
-	doFala "$NARRA" -p "$NARRA" -op "op"
+	_CABECALHO
+	let IF_POTION_FOUND="$IF_POTION_FOUND + 1"
+	#IF_POTION_FOUND=1
+	NARRA="Você encontrou $IF_POTION_FOUND frasco de poção de cura."
+	doFala "$NARRA" -p "$NARRA"
+}
+#----------------------------------------------------------------------
+function _POTION_USE () {
+	_CABECALHO
+	if [[ $POCOES -ge 1 ]]; then
+		if [[ HP_NOW -lt $HP_MAX ]]; then
+			let POCOES="$POCOES - 1"
+			HP_NOW="$HP_MAX"
+			NARRA="Você bebeu uma poção de cura."
+			doFala "$NARRA" -p "$NARRA"
+		else
+			NARRA="Você decide não beber uma poção de cura enquanto estiver completamente saudável."
+			doFala "$NARRA" -p "$NARRA"		
+		fi
+	else
+		NARRA="Você não tem nenhuma poção de cura."
+		doFala "$NARRA" -p "$NARRA"
+	fi
 }
 #----------------------------------------------------------------------
 function _STAIR_FOUND () {
+	_CABECALHO
 	IF_STAIR_FOUND=1
 	NARRA="Você encontrou uma porta destrancada que levará a outro local."
-	doFala "$NARRA" -p "$NARRA" -op "op"
+	doFala "$NARRA" -p "$NARRA"
 }
 #----------------------------------------------------------------------
 function _STAIR_DOWN () {
+	_CABECALHO
 	if [ "$IF_STAIR_FOUND" == "1" ]; then
 		IF_STAIR_FOUND=0
+		IF_POTION_FOUND=0
 		ANDAR=$(( $ANDAR + 1 ))
 		NARRA="Você entra pela porta aberta. Ela misteriosamente se fecha após sua passagem."
-		doFala "$NARRA" -p "$NARRA" -op "op"
+		doFala "$NARRA" -p "$NARRA"
 	else
 		NARRA="Você ainda não encontrou nenhuma porta ou passagem livre."
-		doFala "$NARRA" -p "$NARRA" -op "op"	
+		doFala "$NARRA" -p "$NARRA"
 	fi	
 }
 #----------------------------------------------------------------------
@@ -441,4 +527,3 @@ _OPEN_CONF
 	#doFala "Jogo 'Blind Bash RPG' versão dois ponto zero..."
 	#clear
 _MAIN
-
