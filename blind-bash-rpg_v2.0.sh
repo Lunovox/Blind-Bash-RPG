@@ -427,11 +427,6 @@ function _CHECK_DEPENDENCIES () {
 		echo "Favor digite: sudo apt-get install espeak"
 		exit 0
 	fi
-	if ! foobar_loc="$(type -p 'espeak')" || [ -z "espeak" ]; then
-		echo "comando 'espeak' não encontrado!"
-		echo "Favor digite: sudo apt-get install espeak"
-		exit 0
-	fi
 	if ! foobar_loc="$(type -p 'paplay')" || [ -z "paplay" ]; then
 		# install foobar here
 		echo "comando 'paplay' não encontrado!"
