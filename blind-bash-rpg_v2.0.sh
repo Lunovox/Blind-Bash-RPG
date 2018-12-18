@@ -107,34 +107,15 @@ Selecione uma opção do menu principal:
 	elif [ "$op" == "2" ]; then 
 		_OPEN_GAME;
 	elif [ "$op" == "3" ]; then 
-		if [ "$NARRADOR" == "ATIVADO" ]; then
-			NARRADOR="DESATIVADO"
-			pkill 'espeak' > /dev/null
-			espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "O narrador do jogo agora está '$NARRADOR'."
-		else
-			NARRADOR="ATIVADO"
-		fi
-		_MAIN;
+		_TOGGLE_NARRATOR
 	elif [ "$op" == "4" ]; then 
-		if [ "$DIFICULDADE" == "GUGÚ-DADÁ" ]; then
-			DIFICULDADE="BAIXA"
-		elif [ "$DIFICULDADE" == "BAIXA" ]; then
-			DIFICULDADE="NORMAL"
-		elif [ "$DIFICULDADE" == "NORMAL" ]; then
-			DIFICULDADE="ALTA"
-		elif [ "$DIFICULDADE" == "ALTA" ]; then
-			DIFICULDADE="INSANA"
-		else
-			DIFICULDADE="GUGÚ-DADÁ"
-		fi
-		_MAIN;
+		_CHANGE_DIFFICULTY
 	elif [ "$op" == "5" ]; then 
-		_CREDITOS
+		_DELELOPER_CREDITS
 	elif [ "$op" == "6" ]; then 
-		_SAIRDOJOGO
-	else
-		_MAIN
+		_SAIRDOJOGO	
 	fi
+	_MAIN
 }
 #----------------------------------------------------------------------
 
@@ -153,6 +134,43 @@ function _NOVO () {
 	#read -p ">>> " NOME
 	NOME=$(echo "$NOME" | cut -d " " -f 1)
 	_INIT
+}
+#----------------------------------------------------------------------
+function _TOGGLE_NARRATOR () {
+	if [ "$NARRADOR" == "ATIVADO" ]; then
+		NARRADOR="DESATIVADO"
+		pkill 'espeak' > /dev/null
+		espeak -v pt+f5 -p 60 -a 100 -s 165 -g 10 "O narrador do jogo agora está '$NARRADOR'."
+	else
+		NARRADOR="ATIVADO"
+	fi
+}
+#----------------------------------------------------------------------
+function _CHANGE_DIFFICULTY () {
+	if [ "$DIFICULDADE" == "GUGÚ-DADÁ" ]; then
+		DIFICULDADE="BAIXA"
+	elif [ "$DIFICULDADE" == "BAIXA" ]; then
+		DIFICULDADE="NORMAL"
+	elif [ "$DIFICULDADE" == "NORMAL" ]; then
+		DIFICULDADE="ALTA"
+	elif [ "$DIFICULDADE" == "ALTA" ]; then
+		DIFICULDADE="INSANA"
+	else
+		DIFICULDADE="GUGÚ-DADÁ"
+	fi
+}
+#----------------------------------------------------------------------
+function _DELELOPER_CREDITS () {
+	_CABECALHO
+	NARRA="
+	O jogo foi desenvolvido por...
+	
+	* Lunovox Heavenfinder. Contattos em: https://libreplanet.org/wiki/User:Lunovox
+	"
+	#echo "$NARRA"
+	#doFala "$NARRA" "op"
+	doFala "$NARRA" -p "$NARRA" -op "op"
+	_MAIN
 }
 #----------------------------------------------------------------------
 function _INIT () {
