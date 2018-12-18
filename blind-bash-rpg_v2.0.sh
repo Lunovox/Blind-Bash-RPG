@@ -53,7 +53,7 @@ HP_NOW = ${HP_NOW}
 HP_MAX = ${HP_MAX}
 #-------------------
 	" > $conf
-	NARRA="Você anotou sua localização em um mapa que estava em seu bolso!"
+	NARRA="Você anotou sua localização em um papel que estava em seu bolso!"
 	#echo $NARRA
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	_CAUMA
@@ -88,18 +88,16 @@ function _MAIN () {
 	_CABECALHO
 	LOADTEXT=""
 	if [ -f "${FILE_BASE}${FILE_SAVE}" ]; then 
-		LOADTEXT="(2) Carregar Jogo;"; 
+		LOADTEXT="\n\t(2) Carregar Jogo;"; 
 	fi
 	NARRA="
 Selecione uma opção do menu principal:
 
-	(1) Novo Jogo;
-	${LOADTEXT}
-	(3) Narrador: '$NARRADOR';
-	(4) Dificuldade: '$DIFICULDADE';
-	(5) Listar Conquistas;
-	(6) Listar Desenvolvedores;
-	(7) Sair do Jogo;
+	(1) Novo Jogo; ${LOADTEXT}
+	(3) Listar Conquistas;
+	(4) Listar Desenvolvedores;
+	(5) Configurar Jogo;
+	(6) Sair do Jogo;
 	"
 	#echo "$NARRA"
 	doFala "$NARRA" -p "$NARRA" -op "op"
@@ -109,20 +107,37 @@ Selecione uma opção do menu principal:
 	elif [ "$op" == "2" ]; then 
 		_OPEN_GAME;
 	elif [ "$op" == "3" ]; then 
-		_TOGGLE_NARRATOR
-	elif [ "$op" == "4" ]; then 
-		_CHANGE_DIFFICULTY
-	elif [ "$op" == "5" ]; then 
 		_SHOW_ACHIEVEMENTS
-	elif [ "$op" == "6" ]; then 
+	elif [ "$op" == "4" ]; then 
 		_DELELOPER_CREDITS
-	elif [ "$op" == "7" ]; then 
+	elif [ "$op" == "5" ]; then 
+		_CONFIG
+	elif [ "$op" == "6" ]; then 
 		_SAIRDOJOGO	
 	fi
 	_MAIN
 }
 #----------------------------------------------------------------------
+function _CONFIG () {
+	_CABECALHO
+	NARRA="
+Selecione uma configuração para alterá-la:
 
+	(1) Narrador: '$NARRADOR';
+	(2) Dificuldade: '$DIFICULDADE';
+	(3) Voltar ao menu principal;
+	"
+	doFala "$NARRA" -p "$NARRA" -op "op"
+	if [ "$op" == "1" ]; then 
+		_TOGGLE_NARRATOR
+	elif [ "$op" == "2" ]; then 
+		_CHANGE_DIFFICULTY
+	elif [ "$op" == "3" ]; then 
+		_MAIN	
+	fi
+	_CONFIG
+}
+#----------------------------------------------------------------------
 function _NOVO () {
 	NOME=""
 	ANDAR=1
@@ -180,23 +195,23 @@ function _DELELOPER_CREDITS () {
 function _INIT () {
 	_CABECALHO
 	echo -e "DIFICULDADE: $DIFICULDADE\n\n"
-	NARRA="Você estava dormindo enquanto viajava de trem."
+	NARRA="Você, $NOME, estava dormindo enquanto viajava de trem até a estação em sua casa."
 	doFala "$NARRA" -p "$NARRA" -op "op"
 
 	sl
+	
 	_CABECALHO
 	echo -e "DIFICULDADE: $DIFICULDADE\n\n"
 	NARRA="
 	Ao acorda percebeu que o tem estava parado dentro de um galpão trancado e escuro.
-	Você, $NOME, não sabe por que está trancado aqui, mas deseja saber onde está."
+	Você não sabe por que está trancado aqui, mas deseja saber onde está e o porquê de está aqui."
 	doFala "$NARRA" -p "$NARRA" -op "op"
 
 	_CABECALHO
 	NARRA="
-	Você escuta um grito de mulher em agonia que vem de algum lugar.
+	De repente, você escuta um grito de mulher em agonia que vem de algum lugar.
+	E o faz desejar sair deste lugar o quanto antes.
 	"
-	#echo "$NARRA"
-	#doFala "$NARRA" "op"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	_CAUMA
 }
@@ -266,10 +281,6 @@ function _CABECALHO () {
 	echo $x{0..75}"-"|tr -d ' '
 }
 #----------------------------------------------------------------------
-function _CARREGAR () {
-	echo "carregar"
-}
-#----------------------------------------------------------------------
 function _SAIRDOJOGO () {
 	_SAVE_CONF
 	_CABECALHO
@@ -331,7 +342,7 @@ function _AUTOEXAME () {
 	NARRA="
 Você, $NOME, está no nível $NIVEL com a saúde em ${HP_PERCENT}%. 
 Abriu sua mochila e contou $POCOES poções de cura. 
-Retirou o mapa do bolso.
+Retirou um papel em seu bolso.
 Leu suas anotações enquanto explorava o calabouço.
 Descobriu que está no andar $ANDAR. 
 	"
