@@ -1,4 +1,5 @@
 #!/bin/bash
+#source incl.sh
 
 NARRADOR="ATIVADO"
 DIFICULDADE="NORMAL"
