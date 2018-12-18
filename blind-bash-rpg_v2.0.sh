@@ -210,6 +210,7 @@ O que você irá fazer?
 	(6) Salvar o jogo;
 	(7) Desistir da missão;
 	"
+	NARRA=$(( echo -e "$NARRA" ))
 	#echo "$NARRA"
 	#doFala "$NARRA" "op"
 	doFala "$NARRA" -p "$NARRA" -op "op"
