@@ -11,6 +11,8 @@ NIVEL=1
 POCOES=0
 HP_MAX=100
 HP_NOW=100
+IF_POTION_FOUND=0
+IF_STAIR_FOUND=0
 
 function _OPEN_CONF () {
 	if ! [ -e $FILE_BASE ]; then
@@ -284,10 +286,51 @@ function doFala () {
 	fi
 }
 #----------------------------------------------------------------------
-
+function _EXPLORAR () {
+	SORT_ATACK=$(( $RANDOM % 100 ))
+	if [ ( $SORT_ATACK -lt $(( 11 - $ANDAR )) ) && ( $SORT_ATACK -gt 0 ) ]; then
+		NARRA="Um monstro te encontrou."
+		doFala "$NARRA" -p "$NARRA" -op "op"
+		_SOB_ATACK
+	fi
+	if [ "$IF_POTION_FOUND" == "1" ]; then
+		IF_POTION_FOUND=0
+		NARRA="Ao continuar a explorar este andar, você esqueceu uma poção de cura para traz."
+		doFala "$NARRA" -p "$NARRA" -op "op"
+	else
+		SORT_POTION=$(( $RANDOM % 100 ))
+		if [ ( $SORT_POTION -lt $(( 11 - $ANDAR )) ) && ( $SORT_POTION -gt 0 ) ]; then
+			_POTION_FOUND
+		fi
+	fi
+	if [ "$IF_STAIR_FOUND" == "1" ]; then
+		IF_STAIR_FOUND=0
+		NARRA="Ao continuar a explorar este andar, você esqueceu a localização de onde está a escada para desce."
+		doFala "$NARRA" -p "$NARRA" -op "op"
+	else
+		SORT_STAIR=$(( $RANDOM % 100 ))
+		if [ ( $SORT_STAIR -lt 5 ) && ( $SORT_STAIR -gt 0 ) ]; then
+			_STAIR_FOUND
+		fi
+	fi
+	_CAUMA
+}
+#----------------------------------------------------------------------
+function _POTION_FOUND () {
+	IF_POTION_FOUND=1
+	NARRA="Você encontrou um frasco de poção de cura."
+	doFala "$NARRA" -p "$NARRA" -op "op"
+}
+#----------------------------------------------------------------------
+function _STAIR_FOUND () 
+	IF_STAIR_FOUND=1
+	NARRA="Você encontrou a escada que levará ao andar abaixo."
+	doFala "$NARRA" -p "$NARRA" -op "op"
+}
+#----------------------------------------------------------------------
 _OPEN_CONF
-_CABECALHO
+	#_CABECALHO
 	#doFala "Jogo 'Blind Bash RPG' versão dois ponto zero..."
-	clear
+	#clear
 _MAIN
 
