@@ -192,13 +192,21 @@ function _INIT () {
 #----------------------------------------------------------------------
 function _CAUMA () {
 	_CABECALHO
+	MENU_ADD=""
+	if [ "$IF_POTION_FOUND" == "1" ]; then
+		MENU_ADD="$MENU_ADD \n\t(3) Coletar o que encontrou;"
+	fi
+	if [ $POCOES -gt 0 ]; then
+		MENU_ADD="$MENU_ADD \n\t(4) Beber uma poção de cura;"
+	fi
+	if [ "$IF_STAIR_FOUND" == "1" ]; then
+		MENU_ADD="$MENU_ADD \n\t(5) ir para outro local;"
+	fi
+	
 	NARRA="
 O que você irá fazer?
-	(1) Explorar o andar;
-	(2) Autoexaminar-se;
-	(3) Coletar o que encontrou;
-	(4) Beber uma poção de cura;
-	(5) Descer ao andar inferior;
+	(1) Explorar o local;
+	(2) Autoexaminar-se; $MENU_ADD
 	(6) Salvar o jogo;
 	(7) Desistir da missão;
 	"
@@ -343,7 +351,20 @@ function _EXPLORAR () {
 		elif [ ( $SORT_STAIR -lt 5 ) && ( $SORT_STAIR -gt 0 ) ]; then
 			_STAIR_FOUND
 		else
-			NARRA="Você explora a sala, mas nada está chamando a sua atenção."
+			NARRA="Você explora a sala."
+			SORT_OBJECT=$(( $RANDOM % 5 ))
+			if [ "$SORT_OBJECT" == "1" ]; then
+				NARRA="$NARRA Encontra apenas um jarro quebrado."
+			elif [ "$SORT_OBJECT" == "2" ]; then
+				NARRA="$NARRA Encontra no chão alguns ossos humanos."
+			elif [ "$SORT_OBJECT" == "3" ]; then
+				NARRA="$NARRA Encontra uma porta de jaula trancada."
+			elif [ "$SORT_OBJECT" == "4" ]; then
+				NARRA="$NARRA Encontra um baú trancado por magia ancestral."
+			elif [ "$SORT_OBJECT" == "5" ]; then
+				NARRA="$NARRA Encontra um marca de sangue no chão."
+			fi
+			NARRA="$NARRA Nada aqui é de seu interesse."
 			doFala "$NARRA" -p "$NARRA" -op "op"	
 		fi
 	fi
@@ -370,7 +391,7 @@ function _POTION_FOUND () {
 #----------------------------------------------------------------------
 function _STAIR_FOUND () {
 	IF_STAIR_FOUND=1
-	NARRA="Você encontrou a escada que levará ao andar abaixo."
+	NARRA="Você encontrou uma porta destrancada que levará a outro local."
 	doFala "$NARRA" -p "$NARRA" -op "op"
 }
 #----------------------------------------------------------------------
@@ -378,10 +399,10 @@ function _STAIR_DOWN () {
 	if [ "$IF_STAIR_FOUND" == "1" ]; then
 		IF_STAIR_FOUND=0
 		ANDAR=$(( $ANDAR + 1 ))
-		NARRA="Você desceu pelas escadas que encontrou até o ${ANDAR}º andar."
+		NARRA="Você entra pela porta aberta. Ela misteriosamente se fecha após sua passagem."
 		doFala "$NARRA" -p "$NARRA" -op "op"
 	else
-		NARRA="Aqui não tem nenhuma escada ou corda para você descer."
+		NARRA="Você ainda não encontrou nenhuma porta ou passagem livre."
 		doFala "$NARRA" -p "$NARRA" -op "op"	
 	fi	
 }
