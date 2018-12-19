@@ -263,9 +263,9 @@ function _OFFMISSION () {
 	NARRA="
 Você está muito cansado e resolve se deitar no chão para dormir um pouco.
 Seu descuido lhe custou a vida. 
-Pois ao acordar você percebe que está completamente amarrado e cozinhando dentro de um caldeirão. 
+Pois ao acordar você percebe que está completamente amarrado, e sendo cozinhando dentro de um caldeirão. 
 
-Isto é o fim de jogo para você...
+Isto é o fim de jogo para você!
 	"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	_MAIN
@@ -428,7 +428,7 @@ function _COMBATER () {
 
 	NARRA="O Monstro desfere um ataque contra você."
 	NARRA="$NARRA Retirando ${DANO_PERCENT}% de sua saúde,"
-	NARRA="$NARRA que agora saúde está em ${HP_PERCENT}%!"
+	NARRA="$NARRA que agora está em ${HP_PERCENT}%!"
 	doFala "$NARRA" -p "$NARRA"
 	
 	NARRA="Você mata o monstro!"
