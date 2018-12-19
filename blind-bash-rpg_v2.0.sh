@@ -12,6 +12,7 @@ NIVEL=1
 EXPERIENCE=0
 NARRADOR="ATIVADO"
 DIFICULDADE="NORMAL"
+MONSTER_DAMAGE=10
 POCOES=0
 HP_MAX=100
 HP_NOW=100
@@ -141,9 +142,12 @@ function _NOVO () {
 	NOME=""
 	ANDAR=1
 	NIVEL=1
+	EXPERIENCE=0
 	POCOES=0
 	HP_MAX=100
 	HP_NOW=100
+	IF_POTION_FOUND=0
+	IF_STAIR_FOUND=0
 	_CABECALHO
 	NARRA="Digite seu nome: "
 	doFala "$NARRA" -p "$NARRA" -val "NOME"
@@ -154,7 +158,8 @@ function _NOVO () {
 function _TOGGLE_NARRATOR () {
 	if [ "$NARRADOR" == "ATIVADO" ]; then
 		NARRADOR="DESATIVADO"
-		pkill 'espeak' > /dev/null
+		#pkill 'espeak' > /dev/null
+		{ pkill 'espeak' && wait; } 2>/dev/null
 		espeak $ESPEAK_CONF "O narrador do jogo agora está '$NARRADOR'."
 	else
 		NARRADOR="ATIVADO"
@@ -310,21 +315,24 @@ function doFala () {
 	fi
 	if [ -n "$newop" ]; then
 		if [ "$NARRADOR" == "ATIVADO" ]; then
-			pkill 'espeak' > /dev/null
+			#pkill 'espeak' > /dev/null
+			{ pkill 'espeak' && wait; } 2>/dev/null
 			fala=$(echo -e $1)
 			espeak $ESPEAK_CONF "$fala" &
 		fi
-		read -n 1 -p ">>> " $newop
+		read -s -n 1 -p ">>> " $newop
 	elif [ -n "$newval" ]; then
 		if [ "$NARRADOR" == "ATIVADO" ]; then
-			pkill 'espeak' > /dev/null
+			#pkill 'espeak' > /dev/null
+			{ pkill 'espeak' && wait; } 2>/dev/null
 			fala=$(echo -e "$1")
 			espeak $ESPEAK_CONF "$fala" &
 		fi
 		read -p ">>> " $newval
 	else
 		if [ "$NARRADOR" == "ATIVADO" ]; then
-			pkill 'espeak' > /dev/null
+			#pkill 'espeak' > /dev/null
+			{ pkill 'espeak' && wait; } 2>/dev/null
 			fala=$(echo -e "$1")
 			espeak $ESPEAK_CONF "$fala"
 		fi
@@ -349,7 +357,8 @@ function _AUTOEXAME () {
 
 	NARRA="$NARRA \nVocê sabe o quanto este local é perigoso com a dificuldade '${DIFICULDADE}'."
 	NARRA="$NARRA \nPor isso que precisa sair daqui o quanto antes."
-	let NEXT_NIVEL_XP="$NIVEL * 5"
+	#let NEXT_NIVEL_XP="$NIVEL * 5"
+	_CALC_NEXT_XP
 	
 	echo -e "$NARRA\n\n"
 	echo $x{0..75}"-"|tr -d ' '
@@ -409,31 +418,68 @@ function _EXPLORAR () {
 #----------------------------------------------------------------------
 function _COMBATER () {
 	_CABECALHO
-	let HP_NOW="$HP_NOW - ($ANDAR * 2) - 3"
+	_CALC_DAMAGE
+	let DANO_PERCENT="($MONSTER_DAMAGE * $ANDAR) * 100 / $HP_MAX"
+	let HP_NOW="$HP_NOW - ($MONSTER_DAMAGE * $ANDAR)"
 	let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
 
 	NARRA="Um monstro te encontrou."
 	doFala "$NARRA" -p "$NARRA"
 
-	NARRA="O Monstro desfere um ataque contra você. E te acerta! Sua saúde está em ${HP_PERCENT}%"
+	NARRA="O Monstro desfere um ataque contra você."
+	NARRA="$NARRA Retirando ${DANO_PERCENT}% de sua saúde,"
+	NARRA="$NARRA que agora saúde está em ${HP_PERCENT}%!"
 	doFala "$NARRA" -p "$NARRA"
 	
 	NARRA="Você mata o monstro!"
 	doFala "$NARRA" -p "$NARRA"
 
-	let EXPERIENCE="$EXPERIENCE + $ANDAR"
-	let NEXT_NIVEL_XP="$NIVEL * 5"
+	_CALC_NEXT_XP
 	if [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; then
-		let NIVEL="$NIVEL + 1"
-		let HP_MAX="100 + (($NIVEL -1) * 5)"
-		HP_NOW="$HP_MAX"
-		clear
-		echo -e "\n\n\n"
-		figlet "LEVEL UP"
-		echo -e "\n\n\n"
-		NARRA="Parabéns! Você evoluiu para o nível $NIVEL!"
-		doFala "$NARRA" -p "$NARRA"
+		while [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; do
+			let NIVEL="$NIVEL + 1"
+			let HP_MAX="100 + (($NIVEL -1) * 5)"
+			#let NEXT_NIVEL_XP="$NIVEL * 5"
+			_CALC_NEXT_XP
+			HP_NOW="$HP_MAX"
+			clear
+			echo -e "\n\n\n"
+			figlet "LEVEL UP"
+			echo -e "\n\n\n"
+			NARRA="Parabéns! Você evoluiu para o nível $NIVEL!"
+			doFala "$NARRA" -p "$NARRA"
+		done
 	fi
+}
+#----------------------------------------------------------------------
+function _CALC_DAMAGE () {
+	if [[ "$DIFICULDADE" == "GUGÚ-DADÁ" ]]; then
+		MONSTER_DAMAGE=1
+	elif [[ "$DIFICULDADE" == "BAIXA" ]]; then
+		MONSTER_DAMAGE=2
+	elif [[ "$DIFICULDADE" == "NORMAL" ]]; then
+		MONSTER_DAMAGE=3
+	elif [[ "$DIFICULDADE" == "ALTA" ]]; then
+		MONSTER_DAMAGE=4
+	elif [[ "$DIFICULDADE" == "INSANA" ]]; then
+		MONSTER_DAMAGE=5
+	fi
+}
+#----------------------------------------------------------------------
+function _CALC_NEXT_XP () {
+	let EXPERIENCE="$EXPERIENCE + $ANDAR"
+	if [[ "$DIFICULDADE" == "GUGÚ-DADÁ" ]]; then
+		INCREMENTO=1
+	elif [[ "$DIFICULDADE" == "BAIXA" ]]; then
+		INCREMENTO=5
+	elif [[ "$DIFICULDADE" == "NORMAL" ]]; then
+		INCREMENTO=10
+	elif [[ "$DIFICULDADE" == "ALTA" ]]; then
+		INCREMENTO=15
+	elif [[ "$DIFICULDADE" == "INSANA" ]]; then
+		INCREMENTO=20
+	fi
+	let NEXT_NIVEL_XP="$NIVEL * $INCREMENTO"
 }
 #----------------------------------------------------------------------
 function _POTION_TAKE () {
@@ -523,7 +569,9 @@ function _CHECK_DEPENDENCIES () {
 #----------------------------------------------------------------------
 _CHECK_DEPENDENCIES
 _OPEN_CONF
-	#_CABECALHO
-	#doFala "Jogo 'Blind Bash RPG' versão dois ponto zero..."
-	#clear
+	if [[ "${USER}" != "lunovox" ]]; then
+		_CABECALHO
+		doFala "Jogo 'Blind Bash RPG' versão dois ponto zero..."
+		#clear
+	fi
 _MAIN
