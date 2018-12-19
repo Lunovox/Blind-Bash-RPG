@@ -5,7 +5,7 @@ FILE_BASE="${HOME}/.config/BlindBashRPG/"
 FILE_SAVE="BlindBashRPG.sav"
 FILE_CONF="BlindBashRPG.conf"
 #ESPEAK_CONF="-v pt+f5 -p 60 -a 100 -s 165 -g 10"
-ESPEAK_CONF="-v pt+f2 -p 60 -a 100 -s 165 -g 10"
+ESPEAK_CONF="-v pt+f5 -p 60 -a 100 -s 165 -g 10"
 NOME=""
 ANDAR=1
 NIVEL=1
@@ -359,7 +359,7 @@ function _AUTOEXAME () {
 	NARRA="$NARRA \nPor isso que precisa sair daqui o quanto antes."
 	#let NEXT_NIVEL_XP="$NIVEL * 5"
 	_CALC_NEXT_XP
-	
+
 	echo -e "$NARRA\n\n"
 	echo $x{0..75}"-"|tr -d ' '
 	echo -e "HP: ${HP_NOW}/${HP_MAX} (${HP_PERCENT}%) | XP: ${EXPERIENCE}/${NEXT_NIVEL_XP} | NÍVEL: ${NIVEL} | FASE: ${ANDAR} | DIFICULDADE: ${DIFICULDADE}"
@@ -433,7 +433,8 @@ function _COMBATER () {
 	
 	NARRA="Você mata o monstro!"
 	doFala "$NARRA" -p "$NARRA"
-
+	
+	let EXPERIENCE="$EXPERIENCE + $ANDAR"
 	_CALC_NEXT_XP
 	if [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; then
 		while [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; do
@@ -467,7 +468,6 @@ function _CALC_DAMAGE () {
 }
 #----------------------------------------------------------------------
 function _CALC_NEXT_XP () {
-	let EXPERIENCE="$EXPERIENCE + $ANDAR"
 	if [[ "$DIFICULDADE" == "GUGÚ-DADÁ" ]]; then
 		INCREMENTO=1
 	elif [[ "$DIFICULDADE" == "BAIXA" ]]; then
