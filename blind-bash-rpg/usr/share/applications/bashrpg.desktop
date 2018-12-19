@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=blind-bash-rpg
+Name[pt_BR]=blind-bash-rpg
+GenericName=Blind Bash RPG
+Icon=blind-bash-rpg
+Type=Application
+Version=1.1
+Categories=Game;Utility;Tuatec
+TryExec=blind-bash-rpg
+Exec=blind-bash-rpg
+StartupNotify=false
+Terminal=true
+Comment=Textual RPG game by the terminal with audio-narrator.
+Comment[pt_BR]=Jogo textual de RPG pelo terminal com áudio-narrador.

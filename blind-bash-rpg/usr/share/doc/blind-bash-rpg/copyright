@@ -1,0 +1,9 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Blind Bash RPG
+Upstream-Contact: Lunovox Heavenfinder <https://libreplanet.org/wiki/User:Lunovox>
+Source: https://github.com/Lunovox/Blind-Bash-RPG.git
+
+Files: *
+Copyright: 2017, xerxeslins <xerxeslins@gmail.com>
+           2018, Lunovox Heavenfinder <https://libreplanet.org/wiki/User:Lunovox>
+License: GPL-3.0+ 
