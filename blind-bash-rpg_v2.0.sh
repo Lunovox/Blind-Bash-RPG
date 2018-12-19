@@ -418,38 +418,105 @@ function _EXPLORAR () {
 #----------------------------------------------------------------------
 function _COMBATER () {
 	_CABECALHO
-	_CALC_DAMAGE
-	let DANO_PERCENT="($MONSTER_DAMAGE * $ANDAR) * 100 / $HP_MAX"
-	let HP_NOW="$HP_NOW - ($MONSTER_DAMAGE * $ANDAR)"
-	let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
 
 	NARRA="Um monstro te encontrou."
 	doFala "$NARRA" -p "$NARRA"
+	
+	_CALC_DAMAGE
+	_CALC_HP_MONSTER
+	while [[ $HP_MONSTER -ge 0 ]]; do
+	
+		SORT_INITIATIVE=$(($RANDOM % 2))
+		if [[ $SORT_INITIATIVE -eq 1]]; then
+			let DANO_PERCENT="($MONSTER_DAMAGE * $ANDAR) * 100 / $HP_MAX"
+			let HP_NOW="$HP_NOW - ($MONSTER_DAMAGE * $ANDAR)"
+			let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
+			if [[ $HP_NOW -gt 0 ]]; then
+				NARRA="O Monstro desfere um ataque contra você."
+				NARRA="$NARRA Retirando ${DANO_PERCENT}% de sua saúde,"
+				NARRA="$NARRA que agora está em ${HP_PERCENT}%!"
+				doFala "$NARRA" -p "$NARRA"
+			else
+				NARRA="O Monstro desfere um ataque contra você."
+				NARRA="$NARRA Te desacordando..."
+				doFala "$NARRA" -p "$NARRA"	-op "op"
+				HP_MONSTER=0 
+				_GAME_OVER_ATACK
+			fi
+		else
+			NARRA="Selecione como reagirá ao ataque do Monstro:\n\n"
+			NARRA="$NARRA 	(1) ATACAR;\n"
+			NARRA="$NARRA 	(2) DEFENDER;\n"
+			NARRA="$NARRA 	(3) ESQUIVAR;\n"
+			if [[ $POCOES -ge 1 && $HP_NOW -lt $HP_MAX ]]; then
+				if [[ $POCOES -eq 1 ]]; then
+					NARRA="$NARRA 	(4) BEBER A ÚNICA POÇÃO POSSUI;\n"
+				else
+					NARRA="$NARRA 	(4) BEBER UMA DAS $POCOES POÇÕES;\n"
+				fi
+			fi
+			NARRA="$NARRA 	(5) FUGIR;"\n"
+			doFala "$NARRA" -p "$NARRA" -op "op"
+			
+			if [ "$op" == "1" ]; then 
+				_PLAYER_ATACK
+			elif [ "$op" == "2" ]; then 
+				_PLAYER_DEFEND
+			elif [ "$op" == "3" ]; then 
+				_PLAYER_DODGE
+			elif [ "$op" == "4" ]; then 
+				_POTION_USE
+			elif [ "$op" == "5" ]; then 
+				_RUN_AWAY
+			else
+				_PLAYER_DEFEND;
+			fi
 
-	NARRA="O Monstro desfere um ataque contra você."
-	NARRA="$NARRA Retirando ${DANO_PERCENT}% de sua saúde,"
-	NARRA="$NARRA que agora está em ${HP_PERCENT}%!"
+			if [[ $HP_MONSTER -le 0 ]]; then
+				NARRA="Você mata o monstro!"
+				doFala "$NARRA" -p "$NARRA"
+
+				let EXPERIENCE="$EXPERIENCE + $ANDAR"
+				_CALC_NEXT_XP
+				if [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; then
+					while [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; do
+						let NIVEL="$NIVEL + 1"
+						let HP_MAX="100 + (($NIVEL -1) * 5)"
+						#let NEXT_NIVEL_XP="$NIVEL * 5"
+						_CALC_NEXT_XP
+						HP_NOW="$HP_MAX"
+						clear
+						echo -e "\n\n\n"
+						figlet "LEVEL UP"
+						echo -e "\n\n\n"
+						NARRA="Parabéns! Você evoluiu para o nível $NIVEL!"
+						doFala "$NARRA" -p "$NARRA"
+					done
+				fi
+				break
+			fi
+		fi
+	done
+}
+#----------------------------------------------------------------------
+function _PLAYER_ATACK () {
+	let HP_MONSTER="$HP_MONSTER - $MONSTER_DAMAGE"
+	NARRA="Você desfere um ataque contra o Monstro."
+	NARRA="$NARRA Retirando ${MONSTER_DAMAGE} ponto de dano na saúde dele!"
 	doFala "$NARRA" -p "$NARRA"
-	
-	NARRA="Você mata o monstro!"
-	doFala "$NARRA" -p "$NARRA"
-	
-	let EXPERIENCE="$EXPERIENCE + $ANDAR"
-	_CALC_NEXT_XP
-	if [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; then
-		while [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; do
-			let NIVEL="$NIVEL + 1"
-			let HP_MAX="100 + (($NIVEL -1) * 5)"
-			#let NEXT_NIVEL_XP="$NIVEL * 5"
-			_CALC_NEXT_XP
-			HP_NOW="$HP_MAX"
-			clear
-			echo -e "\n\n\n"
-			figlet "LEVEL UP"
-			echo -e "\n\n\n"
-			NARRA="Parabéns! Você evoluiu para o nível $NIVEL!"
-			doFala "$NARRA" -p "$NARRA"
-		done
+}
+#----------------------------------------------------------------------
+function _CALC_HP_MONSTER () {
+	if [[ "$DIFICULDADE" == "GUGÚ-DADÁ" ]]; then
+		let HP_MONSTER="20 + (($NIVEL -1) * 1)"
+	elif [[ "$DIFICULDADE" == "BAIXA" ]]; then
+		let HP_MONSTER="40 + (($NIVEL -1) * 2)"
+	elif [[ "$DIFICULDADE" == "NORMAL" ]]; then
+		let HP_MONSTER="60 + (($NIVEL -1) * 3)"
+	elif [[ "$DIFICULDADE" == "ALTA" ]]; then
+		let HP_MONSTER="80 + (($NIVEL -1) * 4)"
+	elif [[ "$DIFICULDADE" == "INSANA" ]]; then
+		let HP_MONSTER="100 + (($NIVEL -1) * 5)"
 	fi
 }
 #----------------------------------------------------------------------
