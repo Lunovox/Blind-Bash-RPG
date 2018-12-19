@@ -427,7 +427,7 @@ function _COMBATER () {
 	while [[ $HP_MONSTER -ge 0 ]]; do
 	
 		SORT_INITIATIVE=$(($RANDOM % 2))
-		if [[ $SORT_INITIATIVE -eq 1]]; then
+		if [[ $SORT_INITIATIVE -eq 1 ]]; then
 			let DANO_PERCENT="($MONSTER_DAMAGE * $ANDAR) * 100 / $HP_MAX"
 			let HP_NOW="$HP_NOW - ($MONSTER_DAMAGE * $ANDAR)"
 			let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
@@ -439,12 +439,12 @@ function _COMBATER () {
 			else
 				NARRA="O Monstro desfere um ataque contra você."
 				NARRA="$NARRA Te desacordando..."
-				doFala "$NARRA" -p "$NARRA"	-op "op"
+				doFala "$NARRA" -p "$NARRA"
 				HP_MONSTER=0 
 				_GAME_OVER_ATACK
 			fi
 		else
-			NARRA="Selecione como reagirá ao ataque do Monstro:\n\n"
+			NARRA="Sua vez de reagir:\n\n"
 			NARRA="$NARRA 	(1) ATACAR;\n"
 			NARRA="$NARRA 	(2) DEFENDER;\n"
 			NARRA="$NARRA 	(3) ESQUIVAR;\n"
@@ -455,7 +455,7 @@ function _COMBATER () {
 					NARRA="$NARRA 	(4) BEBER UMA DAS $POCOES POÇÕES;\n"
 				fi
 			fi
-			NARRA="$NARRA 	(5) FUGIR;"\n"
+			NARRA="$NARRA 	(5) FUGIR;'\n"
 			doFala "$NARRA" -p "$NARRA" -op "op"
 			
 			if [ "$op" == "1" ]; then 
@@ -500,9 +500,15 @@ function _COMBATER () {
 }
 #----------------------------------------------------------------------
 function _PLAYER_ATACK () {
-	let HP_MONSTER="$HP_MONSTER - $MONSTER_DAMAGE"
+	let HP_MONSTER="$HP_MONSTER - 10"
 	NARRA="Você desfere um ataque contra o Monstro."
-	NARRA="$NARRA Retirando ${MONSTER_DAMAGE} ponto de dano na saúde dele!"
+	#NARRA="$NARRA Retirando ${MONSTER_DAMAGE} de dano."
+	if [[ $HP_MONSTER -gt 0 ]]; then 
+		let HP_MONS_PERCENT="$HP_MONSTER * 100 / $HP_MONSTER_MAX"
+		NARRA="$NARRA Deixano-lhe com ${HP_MONS_PERCENT}% de saúde."
+	else
+		HP_MONSTER=0; 
+	fi
 	doFala "$NARRA" -p "$NARRA"
 }
 #----------------------------------------------------------------------
@@ -518,6 +524,7 @@ function _CALC_HP_MONSTER () {
 	elif [[ "$DIFICULDADE" == "INSANA" ]]; then
 		let HP_MONSTER="100 + (($NIVEL -1) * 5)"
 	fi
+	HP_MONSTER_MAX="$HP_MONSTER"
 }
 #----------------------------------------------------------------------
 function _CALC_DAMAGE () {
