@@ -18,6 +18,7 @@ HP_MAX=100
 HP_NOW=100
 IF_POTION_FOUND=0
 IF_STAIR_FOUND=0
+BMG_PLAYED=""
 
 function _OPEN_CONF () {
 	if ! [ -e $FILE_BASE ]; then
@@ -87,6 +88,7 @@ function _OPEN_GAME () {
 }
 #----------------------------------------------------------------------
 function _MAIN () {
+	_BMG_PLAY 1
 	_CABECALHO
 	LOADTEXT=""
 	if [ -f "${FILE_BASE}${FILE_SAVE}" ]; then 
@@ -193,6 +195,7 @@ O jogo foi desenvolvido por...
 }
 #----------------------------------------------------------------------
 function _INIT () {
+	_BMG_STOP
 	_CABECALHO
 	NARRA="Você, $NOME, estava dormindo enquanto viajava de trem até a estação em sua casa."
 	doFala "$NARRA" -p "$NARRA" -op "op"
@@ -276,7 +279,7 @@ function _CABECALHO () {
 	echo $x{0..75}"-"|tr -d ' '
 	figlet "BLIND BASH RPG"
 	echo $x{0..75}"-"|tr -d ' '
-	echo "versão 2.0"
+	echo "versão 2.1.0"
 	echo $x{0..75}"-"|tr -d ' '
 }
 #----------------------------------------------------------------------
@@ -287,6 +290,23 @@ function _SAIRDOJOGO () {
 	doFala "$NARRA" -p "$NARRA"
 	clear
 	exit;
+}
+
+#----------------------------------------------------------------------
+function _BMG_PLAY () {
+	if [[ $1 -eq 0 ]]; then
+		_BMG_STOP
+	elif [[ $1 -eq 1 ]]; then
+		if [ "$BMG_PLAYED" != "/usr/share/blind_bash-rpg/sounds/bmg/musimine_(in_harp).ogg" ]; then
+			BMG_PLAYED="/usr/share/blind_bash-rpg/sounds/bmg/musimine_(in_harp).ogg"
+			paplay "/usr/share/blind_bash-rpg/sounds/bmg/musimine_(in_harp).ogg" &
+		fi
+	fi
+}
+#----------------------------------------------------------------------
+function _BMG_STOP () {
+	BMG_PLAYED=""
+	{ pkill 'paplay' && wait; } 2>/dev/null
 }
 #----------------------------------------------------------------------
 function doFala () {
@@ -645,7 +665,7 @@ _CHECK_DEPENDENCIES
 _OPEN_CONF
 	if [[ "${USER}" != "lunovox" ]]; then
 		_CABECALHO
-		doFala "Jogo 'Blind Bash RPG' versão dois ponto zero..."
+		doFala "Jogo 'Blind Bash RPG' versão dois ponto um..."
 		#clear
 	fi
 _MAIN
