@@ -21,7 +21,13 @@ Textual RPG game by the terminal with audio-narrator.
     * Old Version: https://www.vivaolinux.com.br/script/Bash-RPG
     * New Version:  https://github.com/Lunovox/Blind-Bash-RPG.git
 
+## Screenshots:
+
+![screeshot_2018-12-19_22h24m09s.png](https://raw.githubusercontent.com/Lunovox/Blind-Bash-RPG/master/Images/screeshot_2018-12-19_22h24m09s.png)
+
 _____
+
+## Command Tips for developers of this game:
 
 ### Command to generate the hash of the files in the package:
 ````
