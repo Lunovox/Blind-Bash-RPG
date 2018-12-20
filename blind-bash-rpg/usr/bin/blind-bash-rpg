@@ -286,10 +286,11 @@ function _CABECALHO () {
 #----------------------------------------------------------------------
 function _SAIRDOJOGO () {
 	_SAVE_CONF
-	_GAME_OVER
+	_BMG_STOP
 	_CABECALHO
 	NARRA="Obrigado por jogar 'Blind Bash RPG'!"
 	doFala "$NARRA" -p "$NARRA"
+	_BMG_STOP
 	clear
 	exit;
 }
@@ -300,6 +301,7 @@ function _BMG_PLAY () {
 		_BMG_STOP
 	elif [[ $1 -eq 1 ]]; then
 		if [ "$BMG_PLAYED" != "/usr/share/blind_bash-rpg/sounds/bmg/musimine_(in_harp).ogg" ]; then
+			_BMG_STOP
 			BMG_PLAYED="/usr/share/blind_bash-rpg/sounds/bmg/musimine_(in_harp).ogg"
 			paplay "/usr/share/blind_bash-rpg/sounds/bmg/musimine_(in_harp).ogg" &
 		fi
@@ -308,7 +310,12 @@ function _BMG_PLAY () {
 #----------------------------------------------------------------------
 function _BMG_STOP () {
 	BMG_PLAYED=""
-	{ pkill 'paplay' && wait; } 2>/dev/null
+	#{ pkill 'paplay' && wait; } 2>/dev/null
+	echo $(pkill 'paplay' && wait;)
+	while [ "$(pkill 'paplay' && wait)" != "" ]; do
+		#{ pkill 'paplay'; }
+		echo $(pkill 'paplay' && wait;)
+	done
 }
 #----------------------------------------------------------------------
 function doFala () {
