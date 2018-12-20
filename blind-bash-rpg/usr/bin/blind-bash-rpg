@@ -73,6 +73,7 @@ function _OPEN_GAME () {
 		POCOES=$(cat $conf | grep "POCOES" | cut -d "=" -f 2 | tr -d " ")
 		HP_NOW=$(cat $conf | grep "HP_NOW" | cut -d "=" -f 2 | tr -d " ")
 		HP_MAX=$(cat $conf | grep "HP_MAX" | cut -d "=" -f 2 | tr -d " ")
+		_BMG_STOP
 		_AUTOEXAME
 		_CAUMA
 	else
@@ -252,12 +253,12 @@ O que você irá fazer?
 	elif [ "$op" == "6" ]; then
 		_SAVE_GAME
 	elif [ "$op" == "7" ]; then
-		_OFFMISSION
+		_GAME_OVER
 	fi
 	_CAUMA
 }
 #----------------------------------------------------------------------
-function _OFFMISSION () {
+function _GAME_OVER () {
 	#_CABECALHO
 	clear
 	echo -e "\n\n\n"
@@ -279,12 +280,13 @@ function _CABECALHO () {
 	echo $x{0..75}"-"|tr -d ' '
 	figlet "BLIND BASH RPG"
 	echo $x{0..75}"-"|tr -d ' '
-	echo "versão 2.1.0"
+	echo "versão 2.1.1"
 	echo $x{0..75}"-"|tr -d ' '
 }
 #----------------------------------------------------------------------
 function _SAIRDOJOGO () {
 	_SAVE_CONF
+	_GAME_OVER
 	_CABECALHO
 	NARRA="Obrigado por jogar 'Blind Bash RPG'!"
 	doFala "$NARRA" -p "$NARRA"
@@ -461,7 +463,7 @@ function _COMBATER () {
 				NARRA="$NARRA Te desacordando..."
 				doFala "$NARRA" -p "$NARRA"
 				HP_MONSTER=0 
-				_GAME_OVER_ATACK
+				_GAME_OVER
 			fi
 		else
 			NARRA="Sua vez de reagir:\n\n"
