@@ -4,9 +4,8 @@ Textual RPG game by the terminal with audio-narrator.
 
   * Supported Languages:
     * Portuguese (Default)
-  * Repository: 
-    * Old Version: https://www.vivaolinux.com.br/script/Bash-RPG
-    * New Version:  https://github.com/Lunovox/Blind-Bash-RPG.git
+  * License: 
+    * All files → [GPL v3.0](https://github.com/Lunovox/Blind-Bash-RPG/blob/master/LICENSE)
   * Download:
     * [Install Package](https://github.com/Lunovox/Blind-Bash-RPG/raw/master/Packages/blind-bash-rpg_2.0.0_all.deb) (DEB of New Version for all architectures)
     * [Source Code](https://github.com/Lunovox/Blind-Bash-RPG/archive/master.zip) (ZIP of New Version )
@@ -15,11 +14,12 @@ Textual RPG game by the terminal with audio-narrator.
     * sl (>= 3.03-17)
     * espeak (>= 1.47.11)
     * pulseaudio-utils (>= 4.0.0)
-  * License: 
-    * All files → [GPL v3.0](https://github.com/Lunovox/Blind-Bash-RPG/blob/master/LICENSE)
   * Developers contacts:
-    * 2017, [xerxeslins](mailto:xerxeslins@gmail.com)
+    * 2017, [Xerxes Lins](mailto:xerxeslins@gmail.com)
     * 2018, [Lunovox Heavenfinder](https://libreplanet.org/wiki/User:Lunovox)
+  * Repository: 
+    * Old Version: https://www.vivaolinux.com.br/script/Bash-RPG
+    * New Version:  https://github.com/Lunovox/Blind-Bash-RPG.git
 
 _____
 
