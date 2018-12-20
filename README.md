@@ -15,11 +15,25 @@ Textual RPG game by the terminal with audio-narrator.
 
 _____
 
-Command to generate the sample package:
-  * ````dpkg-deb -b ./Blind-Bash-RPG ./````
+### Command to generate the hash of the files in the package:
+````
+	cd ./blind-bash-rpg/
+	find usr/ -type f -exec md5sum {} \; > DEBIAN/md5sums
+````
 
-Command to extract the contents of a deb package into a directory:
+### Command to reveal the package name of a dependency:
+	* ````sudo apt-cache search paplay````
+
+### Command to reveal the package version of a dependency:
+	* ````sudo apt version pulseaudio-utils````
+
+
+### Command to generate the sample package in the "Packages" directory:
+	* ````dpkg-deb -b ./blind-bash-rpg/ ./Packages/````
+
+
+### Command to extract the contents of a DB package in the "blind-bash-rpg" directory:
 ````
-  mkdir Blind-Bash-RPG
-  dpkg-deb -x ./Blind-Bash-RPG.deb ./Blind-Bash-RPG
+	dpkg-deb -x ./blind-bash-rpg.deb ./blind-bash-rpg
 ````
+

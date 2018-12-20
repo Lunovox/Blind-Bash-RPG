@@ -1,0 +1,16 @@
+Package:blind-bash-rpg
+Version: 2.0.0
+Priority:
+Architecture: all
+Essential:
+Depends: figlet (>= 2.2.5), sl (>= 3.03-17), espeak (>= 1.47.11), pulseaudio-utils (>= 4.0.0)
+Pre-depends:
+Suggests:
+Installed-Size:
+Maintainer: Lunovox Heavenfinder <https://libreplanet.org/wiki/User:Lunovox>
+Conflicts:
+Replaces:
+Provides:
+Description: Jogo textual de RPG pelo terminal com áudio-narrador.
+
+
