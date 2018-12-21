@@ -303,7 +303,7 @@ function _BMG_PLAY () {
 		if [ "$BMG_PLAYED" != "/usr/share/blind_bash-rpg/sounds/bmg/musimine_(in_harp).ogg" ]; then
 			_BMG_STOP
 			BMG_PLAYED="/usr/share/blind_bash-rpg/sounds/bmg/musimine_(in_harp).ogg"
-			paplay "/usr/share/blind_bash-rpg/sounds/bmg/musimine_(in_harp).ogg" &
+			#paplay "/usr/share/blind_bash-rpg/sounds/bmg/musimine_(in_harp).ogg" &
 		fi
 	fi
 }
@@ -311,10 +311,9 @@ function _BMG_PLAY () {
 function _BMG_STOP () {
 	BMG_PLAYED=""
 	#{ pkill 'paplay' && wait; } 2>/dev/null
-	echo $(pkill 'paplay' && wait;)
+	#echo $(pkill 'paplay' && wait;)
 	while [ "$(pkill 'paplay' && wait)" != "" ]; do
-		#{ pkill 'paplay'; }
-		echo $(pkill 'paplay' && wait;)
+		#{ pkill 'paplay' && wait; } 2>/dev/null
 	done
 }
 #----------------------------------------------------------------------
