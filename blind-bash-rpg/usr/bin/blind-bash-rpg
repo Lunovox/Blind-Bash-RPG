@@ -456,21 +456,7 @@ function _COMBATER () {
 	
 		SORT_INITIATIVE=$(($RANDOM % 2))
 		if [[ $SORT_INITIATIVE -eq 1 ]]; then
-			let DANO_PERCENT="($MONSTER_DAMAGE * $ANDAR) * 100 / $HP_MAX"
-			let HP_NOW="$HP_NOW - ($MONSTER_DAMAGE * $ANDAR)"
-			let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
-			if [[ $HP_NOW -gt 0 ]]; then
-				NARRA="O Monstro desfere um ataque contra você."
-				NARRA="$NARRA Retirando ${DANO_PERCENT}% de sua saúde,"
-				NARRA="$NARRA que agora está em ${HP_PERCENT}%!"
-				doFala "$NARRA" -p "$NARRA"
-			else
-				NARRA="O Monstro desfere um ataque contra você."
-				NARRA="$NARRA Te desacordando..."
-				doFala "$NARRA" -p "$NARRA"
-				HP_MONSTER=0 
-				_GAME_OVER
-			fi
+			_MONSTER_ATACK
 		else
 			NARRA="Sua vez de reagir:\n\n"
 			NARRA="$NARRA 	(1) ATACAR;\n"
@@ -495,32 +481,23 @@ function _COMBATER () {
 			elif [ "$op" == "4" ]; then 
 				_POTION_USE
 			elif [ "$op" == "5" ]; then 
-				_RUN_AWAY
+				_CALC_SORT_AWAY
+				if [[ $ANDAR -le $SORT_AWAY ]]; then #Falha de Esquiva/Defesa
+					NARRA="$NOME tenta escapar do monstro, mas..."
+					doFala "$NARRA" -p "$NARRA"
+					_MONSTER_ATACK
+				else
+					NARRA="Você se aproveita uma destração do monstro,"
+					NARRA="$NARRA e consegue escapar pelos corredores escuros."
+					doFala "$NARRA" -p "$NARRA"
+					break
+				fi
 			else
 				_PLAYER_DEFEND;
 			fi
 
 			if [[ $HP_MONSTER -le 0 ]]; then
-				NARRA="Você mata o monstro!"
-				doFala "$NARRA" -p "$NARRA"
-
-				let EXPERIENCE="$EXPERIENCE + $ANDAR"
-				_CALC_NEXT_XP
-				if [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; then
-					while [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; do
-						let NIVEL="$NIVEL + 1"
-						let HP_MAX="100 + (($NIVEL -1) * 5)"
-						#let NEXT_NIVEL_XP="$NIVEL * 5"
-						_CALC_NEXT_XP
-						HP_NOW="$HP_MAX"
-						clear
-						echo -e "\n\n\n"
-						figlet "LEVEL UP"
-						echo -e "\n\n\n"
-						NARRA="Parabéns! Você evoluiu para o nível $NIVEL!"
-						doFala "$NARRA" -p "$NARRA"
-					done
-				fi
+				_MONSTER_KILLED
 				break
 			fi
 		fi
@@ -540,6 +517,68 @@ function _PLAYER_ATACK () {
 	doFala "$NARRA" -p "$NARRA"
 }
 #----------------------------------------------------------------------
+function _MONSTER_KILLED () {
+	NARRA="Você mata o monstro!"
+	doFala "$NARRA" -p "$NARRA"
+
+	let EXPERIENCE="$EXPERIENCE + $ANDAR"
+	_CALC_NEXT_XP
+	if [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; then
+		while [[ $EXPERIENCE -ge $NEXT_NIVEL_XP ]]; do
+			let NIVEL="$NIVEL + 1"
+			let HP_MAX="100 + (($NIVEL -1) * 5)"
+			#let NEXT_NIVEL_XP="$NIVEL * 5"
+			_CALC_NEXT_XP
+			HP_NOW="$HP_MAX"
+			clear
+			echo -e "\n\n\n"
+			figlet "LEVEL UP"
+			echo -e "\n\n\n"
+			NARRA="Parabéns! Você evoluiu para o nível $NIVEL!"
+			doFala "$NARRA" -p "$NARRA"
+		done
+	fi
+}
+#----------------------------------------------------------------------
+function _MONSTER_ATACK () {
+	let DANO_PERCENT="($MONSTER_DAMAGE * $ANDAR) * 100 / $HP_MAX"
+	let HP_NOW="$HP_NOW - ($MONSTER_DAMAGE * $ANDAR)"
+	let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
+	if [[ $HP_NOW -gt 0 ]]; then
+		NARRA="O Monstro desfere um ataque contra você."
+		NARRA="$NARRA Retirando ${DANO_PERCENT}% de sua saúde,"
+		NARRA="$NARRA que agora está em ${HP_PERCENT}%!"
+		doFala "$NARRA" -p "$NARRA"
+	else
+		NARRA="O Monstro desfere um ataque contra você."
+		NARRA="$NARRA Te desacordando..."
+		doFala "$NARRA" -p "$NARRA"
+		HP_MONSTER=0 
+		_GAME_OVER
+	fi
+}
+#----------------------------------------------------------------------
+function _PLAYER_DEFEND () {
+	SORT_DEFEND=$(($RANDOM % $NIVEL))
+	if [[ $ANDAR -le $SORT_DEFEND ]]; then #Falha de Esquiva/Defesa
+		NARRA="$NOME tenta bloquear do ataque do monstro, mas..."
+		doFala "$NARRA" -p "$NARRA"
+	fi
+}
+#----------------------------------------------------------------------
+function _PLAYER_DODGE () {
+	SORT_DEFEND=$(($RANDOM % $NIVEL))
+	if [[ $ANDAR -le $SORT_DEFEND ]]; then #Falha de Esquiva/Defesa
+		NARRA="$NOME tenta desviar do ataque do monstro, mas..."
+		doFala "$NARRA" -p "$NARRA"
+		_MONSTER_ATACK
+	else
+		NARRA="Você consegue desviar do ataque do monstro. contra-ataca..."
+		doFala "$NARRA" -p "$NARRA"
+		_PLAYER_ATACK
+	fi
+}
+#----------------------------------------------------------------------
 function _CALC_HP_MONSTER () {
 	if [[ "$DIFICULDADE" == "GUGÚ-DADÁ" ]]; then
 		let HP_MONSTER="20 + (($NIVEL -1) * 1)"
@@ -553,6 +592,20 @@ function _CALC_HP_MONSTER () {
 		let HP_MONSTER="100 + (($NIVEL -1) * 5)"
 	fi
 	HP_MONSTER_MAX="$HP_MONSTER"
+}
+#----------------------------------------------------------------------
+function _CALC_SORT_AWAY () {
+	if [[ "$DIFICULDADE" == "GUGÚ-DADÁ" ]]; then
+		let SORT_AWAY="$RANDOM % ($NIVEL * 5)"
+	elif [[ "$DIFICULDADE" == "BAIXA" ]]; then
+		let SORT_AWAY="$RANDOM % ($NIVEL * 4)"
+	elif [[ "$DIFICULDADE" == "NORMAL" ]]; then
+		let SORT_AWAY="$RANDOM % ($NIVEL * 3)"
+	elif [[ "$DIFICULDADE" == "ALTA" ]]; then
+		let SORT_AWAY="$RANDOM % ($NIVEL * 2)"
+	elif [[ "$DIFICULDADE" == "INSANA" ]]; then
+		let SORT_AWAY="$RANDOM % ($NIVEL * 1)"
+	fi
 }
 #----------------------------------------------------------------------
 function _CALC_DAMAGE () {
@@ -673,7 +726,7 @@ _CHECK_DEPENDENCIES
 _OPEN_CONF
 	if [[ "${USER}" != "lunovox" ]]; then
 		_CABECALHO
-		doFala "Jogo 'Blind Bash RPG' versão dois ponto um..."
+		doFala "Jogo 'Blind Bash RPG' versão dois ponto um (alfa)..."
 		#clear
 	fi
 _MAIN
