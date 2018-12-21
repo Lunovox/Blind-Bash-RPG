@@ -1,7 +1,8 @@
 #!/bin/bash
 #source incl.sh
 
-VERSION_GAME="2.1.1 (Alfa)"
+VERSION_GAME="2.1.2 (Alpha)"
+VERSION_NARRED="dois ponto um (alfa)"
 FILE_BASE="${HOME}/.config/BlindBashRPG/"
 FILE_SAVE="BlindBashRPG.sav"
 FILE_CONF="BlindBashRPG.conf"
@@ -100,10 +101,10 @@ function _MAIN () {
 	NARRA="
 Selecione uma opção do menu principal:
 
-	(1) NOVO JOGO EM $DIFICULDADE; ${LOADTEXT}
+	(1) NOVO JOGO EM 'Dificuldade ${DIFICULDADE}'; ${LOADTEXT}
 	(3) LISTAR CONQUISTAS;
 	(4) DESENVOLVEDORES;
-	(5) CONFIGURAÇÕES;
+	(5) CONFIGURAÇÕES DE JOGO;
 	(6) SAIR DO JOGO;
 	"
 	doFala "$NARRA" -p "$NARRA" -op "op"
@@ -316,6 +317,7 @@ function _BMG_STOP () {
 	#echo $(pkill 'paplay' && wait;)
 	while [ "$(pkill 'paplay' && wait)" != "" ]; do
 		#{ pkill 'paplay' && wait; } 2>/dev/null
+		echo ""
 	done
 }
 #----------------------------------------------------------------------
@@ -469,7 +471,10 @@ function _COMBATER () {
 					NARRA="$NARRA 	(4) BEBER UMA DAS $POCOES POÇÕES;\n"
 				fi
 			fi
-			NARRA="$NARRA 	(5) FUGIR;'\n"
+			_CALC_AWAY_SORT
+			if [[ $AWAY_PERCENT -gt 0 ]]; then
+				NARRA="$NARRA 	(5) FUGIR (${AWAY_PERCENT}%);'\n"
+			fi
 			doFala "$NARRA" -p "$NARRA" -op "op"
 			
 			if [ "$op" == "1" ]; then 
@@ -481,16 +486,21 @@ function _COMBATER () {
 			elif [ "$op" == "4" ]; then 
 				_POTION_USE
 			elif [ "$op" == "5" ]; then 
-				_CALC_SORT_AWAY
-				if [[ $ANDAR -le $SORT_AWAY ]]; then #Falha de Esquiva/Defesa
-					NARRA="$NOME tenta escapar do $MONSTER_TYPE, mas..."
+				_CALC_AWAY_SORT
+				#echo "$ANDAR <= $AWAY_SORT de ${AWAY_MAX} (${AWAY_PERCENT}%)"
+				if [[ $AWAY_PERCENT -le 0 ]]; then
+					NARRA="$NOME sabe que não tem nenhuma chance, mas tenta escapar do $MONSTER_TYPE."
 					doFala "$NARRA" -p "$NARRA"
-					_MONSTER_ATACK
-				else
-					NARRA="Você se aproveita uma destração do $MONSTER_TYPE,"
+					_MONSTER_ATACK				
+				elif [[ $ANDAR -le $AWAY_SORT ]]; then
+					NARRA="Você se aproveita uma distração do $MONSTER_TYPE,"
 					NARRA="$NARRA e consegue escapar pelos corredores escuros."
 					doFala "$NARRA" -p "$NARRA"
 					break
+				else #Falha de Fuga
+					NARRA="$NOME tenta escapar do $MONSTER_TYPE, mas..."
+					doFala "$NARRA" -p "$NARRA"
+					_MONSTER_ATACK
 				fi
 			else
 				_PLAYER_DEFEND;
@@ -611,17 +621,29 @@ function _CALC_HP_MONSTER () {
 	HP_MONSTER_MAX="$HP_MONSTER"
 }
 #----------------------------------------------------------------------
-function _CALC_SORT_AWAY () {
+function _CALC_AWAY_SORT () {
 	if [[ "$DIFICULDADE" == "GUGÚ-DADÁ" ]]; then
-		let SORT_AWAY="$RANDOM % ($NIVEL * 5)"
+		#let AWAY_MAX="(($NIVEL - 1) / 2) * 5"
+		let AWAY_MAX="($NIVEL - 1) * 5"
 	elif [[ "$DIFICULDADE" == "BAIXA" ]]; then
-		let SORT_AWAY="$RANDOM % ($NIVEL * 4)"
+		#let AWAY_MAX="(($NIVEL - 1) / 2) * 4"
+		let AWAY_MAX="($NIVEL - 1) * 4"
 	elif [[ "$DIFICULDADE" == "NORMAL" ]]; then
-		let SORT_AWAY="$RANDOM % ($NIVEL * 3)"
+		#let AWAY_MAX="(($NIVEL - 1) / 2) * 3"
+		let AWAY_MAX="($NIVEL - 1) * 3"
 	elif [[ "$DIFICULDADE" == "ALTA" ]]; then
-		let SORT_AWAY="$RANDOM % ($NIVEL * 2)"
+		#let AWAY_MAX="(($NIVEL - 1) / 2) * 1"
+		let AWAY_MAX="($NIVEL - 1) * 2"
 	elif [[ "$DIFICULDADE" == "INSANA" ]]; then
-		let SORT_AWAY="$RANDOM % ($NIVEL * 1)"
+		#let AWAY_MAX="(($NIVEL - 1) / 2) * 1"
+		let AWAY_MAX="($NIVEL - 1) * 1"
+	fi
+	if [[ $AWAY_MAX -gt 0 && $AWAY_MAX -gt $ANDAR ]]; then
+		let AWAY_PERCENT="($AWAY_MAX - $ANDAR) * 100  / $AWAY_MAX"
+		let AWAY_SORT="$RANDOM % $AWAY_MAX"
+	else
+		AWAY_PERCENT=0
+		AWAY_SORT=0
 	fi
 }
 #----------------------------------------------------------------------
@@ -729,6 +751,8 @@ function _CABECALHO () {
 }
 #----------------------------------------------------------------------
 function _CABECALHO_ROLEPLAY () {
+	let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
+	_CALC_NEXT_XP
 	clear
 	_PRINT_BAR
 	figlet "BLIND BASH RPG"
@@ -766,7 +790,7 @@ _CHECK_DEPENDENCIES
 _OPEN_CONF
 	if [[ "${USER}" != "lunovox" ]]; then
 		_CABECALHO
-		doFala "Jogo 'Blind Bash RPG' versão dois ponto um (alfa)..."
+		doFala "Jogo 'Blind Bash RPG' versão ${VERSION_NARRED}..."
 		#clear
 	fi
 _MAIN
