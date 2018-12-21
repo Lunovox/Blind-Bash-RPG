@@ -7,7 +7,7 @@ Textual RPG game by the terminal with audio-narrator.
   * License: 
     * All files → [GPL v3.0](https://github.com/Lunovox/Blind-Bash-RPG/blob/master/LICENSE)
   * Download:
-    * [Install Package](https://github.com/Lunovox/Blind-Bash-RPG/raw/master/Packages/blind-bash-rpg_2.0.0_all.deb) (DEB of New Version for all architectures)
+    * [Install Package](https://github.com/Lunovox/Blind-Bash-RPG/tree/master/Packages) (DEB of New Version for all architectures)
     * [Source Code](https://github.com/Lunovox/Blind-Bash-RPG/archive/master.zip) (ZIP of New Version )
   * Depends:
     * figlet (>= 2.2.5)
