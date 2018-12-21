@@ -186,10 +186,19 @@ function _CHANGE_DIFFICULTY () {
 function _DELELOPER_CREDITS () {
 	_CABECALHO
 	NARRA="
-O jogo foi desenvolvido por...
+O jogo Blind-Bash-RPG foi desenvolvido por...
 
-	. Lunovox Heavenfinder. 
-			Contatos em: https://libreplanet.org/wiki/User:Lunovox
+	2017, Xerxes Lins (versão antiga conhecida como 'Bash_RPG').
+			Contatos em e-mail: xerxeslins@gmail.com
+	2018, Lunovox Heavenfinder (versão atual). 
+			Contatos em site: https://libreplanet.org/wiki/User:Lunovox
+			
+Licença do Jogo:
+		GPL v3.0 - Você tem o direito de baixar, copiar, modificar, e redistribuir este jogo 
+		sobre as condições da licença 'GNU General Public License versão 3.0'.
+
+O código fonte do 'Blind-Bash-RPG' está disponível em:
+		https://github.com/Lunovox/Blind-Bash-RPG
 	"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	_MAIN
