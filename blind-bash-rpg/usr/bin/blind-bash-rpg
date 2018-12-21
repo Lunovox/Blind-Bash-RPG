@@ -1,6 +1,7 @@
 #!/bin/bash
 #source incl.sh
 
+VERSION_GAME="2.1.1 (Alfa)"
 FILE_BASE="${HOME}/.config/BlindBashRPG/"
 FILE_SAVE="BlindBashRPG.sav"
 FILE_CONF="BlindBashRPG.conf"
@@ -189,16 +190,16 @@ function _DELELOPER_CREDITS () {
 O jogo Blind-Bash-RPG foi desenvolvido por...
 
 	2017, Xerxes Lins (versão antiga conhecida como 'Bash_RPG').
-			Contatos em e-mail: xerxeslins@gmail.com
+		Contatos em e-mail: xerxeslins@gmail.com
 	2018, Lunovox Heavenfinder (versão atual). 
-			Contatos em site: https://libreplanet.org/wiki/User:Lunovox
+		Contatos em site: https://libreplanet.org/wiki/User:Lunovox
 			
 Licença do Jogo:
-		GPL v3.0 - Você tem o direito de baixar, copiar, modificar, e redistribuir este jogo 
-		sobre as condições da licença 'GNU General Public License versão 3.0'.
+	GPL v3.0 - Você tem o direito de baixar, copiar, modificar, e redistribuir este jogo 
+	sobre as condições da licença 'GNU General Public License versão 3.0'.
 
 O código fonte do 'Blind-Bash-RPG' está disponível em:
-		https://github.com/Lunovox/Blind-Bash-RPG
+	https://github.com/Lunovox/Blind-Bash-RPG
 	"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	_MAIN
@@ -206,7 +207,7 @@ O código fonte do 'Blind-Bash-RPG' está disponível em:
 #----------------------------------------------------------------------
 function _INIT () {
 	_BMG_STOP
-	_CABECALHO
+	_CABECALHO_ROLEPLAY
 	NARRA="Você, $NOME, estava dormindo enquanto viajava de trem até a estação em sua casa."
 	doFala "$NARRA" -p "$NARRA" -op "op"
 
@@ -247,7 +248,7 @@ O que você irá fazer?
 	(7) Dormir um pouco;
 	"
 	#NARRA=$((printf $NARRA))
-	_CABECALHO
+	_CABECALHO_ROLEPLAY
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	if [ "$op" == "1" ]; then
 		_EXPLORAR
@@ -282,15 +283,6 @@ Isto é o fim de jogo para você!
 	"
 	doFala "$NARRA" -p "$NARRA" -op "op"
 	_MAIN
-}
-#----------------------------------------------------------------------
-function _CABECALHO () {
-	clear
-	echo $x{0..75}"-"|tr -d ' '
-	figlet "BLIND BASH RPG"
-	echo $x{0..75}"-"|tr -d ' '
-	echo "versão 2.1.1"
-	echo $x{0..75}"-"|tr -d ' '
 }
 #----------------------------------------------------------------------
 function _SAIRDOJOGO () {
@@ -377,7 +369,7 @@ function doFala () {
 }
 #----------------------------------------------------------------------
 function _AUTOEXAME () {
-	_CABECALHO
+	_CABECALHO_ROLEPLAY
 	let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
 	#HP_PERCENT=$( $HP_NOW * 100 / $HP_MAX )
 	
@@ -397,15 +389,12 @@ function _AUTOEXAME () {
 	#let NEXT_NIVEL_XP="$NIVEL * 5"
 	_CALC_NEXT_XP
 
-	echo -e "$NARRA\n\n"
-	echo $x{0..75}"-"|tr -d ' '
-	echo -e "HP: ${HP_NOW}/${HP_MAX} (${HP_PERCENT}%) | XP: ${EXPERIENCE}/${NEXT_NIVEL_XP} | NÍVEL: ${NIVEL} | FASE: ${ANDAR} | DIFICULDADE: ${DIFICULDADE}"
-	echo $x{0..75}"-"|tr -d ' '
-	doFala "$NARRA"  -op "op"
+	#echo -e "$NARRA"
+	doFala "$NARRA" -p "$NARRA"  -op "op"
 }
 #----------------------------------------------------------------------
 function _EXPLORAR () {
-	_CABECALHO
+	_CABECALHO_ROLEPLAY
 	SORT_ATACK=$(($RANDOM % 100))
 	if [[ ( $SORT_ATACK -ge 0 ) && ( $SORT_ATACK -le $(( 19 + $ANDAR )) ) ]]; then
 		clear
@@ -454,7 +443,7 @@ function _EXPLORAR () {
 }
 #----------------------------------------------------------------------
 function _COMBATER () {
-	_CABECALHO
+	_CABECALHO_ROLEPLAY
 
 	NARRA="Um monstro te encontrou."
 	doFala "$NARRA" -p "$NARRA"
@@ -647,7 +636,7 @@ function _CALC_NEXT_XP () {
 }
 #----------------------------------------------------------------------
 function _POTION_TAKE () {
-	_CABECALHO
+	_CABECALHO_ROLEPLAY
 	if [[ $IF_POTION_FOUND -ge 1 ]]; then
 		#POCOES=$(( $POCOES + 1 ))
 		let POCOES="$POCOES + $IF_POTION_FOUND"
@@ -661,7 +650,7 @@ function _POTION_TAKE () {
 }
 #----------------------------------------------------------------------
 function _POTION_FOUND () {
-	_CABECALHO
+	_CABECALHO_ROLEPLAY
 	let IF_POTION_FOUND="$IF_POTION_FOUND + 1"
 	#IF_POTION_FOUND=1
 	NARRA="Você encontrou $IF_POTION_FOUND frasco de poção de cura."
@@ -669,7 +658,7 @@ function _POTION_FOUND () {
 }
 #----------------------------------------------------------------------
 function _POTION_USE () {
-	_CABECALHO
+	_CABECALHO_ROLEPLAY
 	if [[ $POCOES -ge 1 ]]; then
 		if [[ HP_NOW -lt $HP_MAX ]]; then
 			let POCOES="$POCOES - 1"
@@ -687,14 +676,14 @@ function _POTION_USE () {
 }
 #----------------------------------------------------------------------
 function _STAIR_FOUND () {
-	_CABECALHO
+	_CABECALHO_ROLEPLAY
 	IF_STAIR_FOUND=1
 	NARRA="Você encontrou uma porta destrancada que levará a outro local."
 	doFala "$NARRA" -p "$NARRA"
 }
 #----------------------------------------------------------------------
 function _STAIR_DOWN () {
-	_CABECALHO
+	_CABECALHO_ROLEPLAY
 	if [ "$IF_STAIR_FOUND" == "1" ]; then
 		IF_STAIR_FOUND=0
 		IF_POTION_FOUND=0
@@ -705,6 +694,29 @@ function _STAIR_DOWN () {
 		NARRA="Você ainda não encontrou nenhuma porta ou passagem livre."
 		doFala "$NARRA" -p "$NARRA"
 	fi	
+}
+#----------------------------------------------------------------------
+function _PRINT_BAR () {
+	echo $x{0..80}"-"|tr -d ' '
+}
+#----------------------------------------------------------------------
+function _CABECALHO () {
+	clear
+	_PRINT_BAR
+	figlet "BLIND BASH RPG"
+	_PRINT_BAR
+	echo "versão $VERSION_GAME"
+	_PRINT_BAR
+}
+#----------------------------------------------------------------------
+function _CABECALHO_ROLEPLAY () {
+	clear
+	_PRINT_BAR
+	figlet "BLIND BASH RPG"
+	echo "versão $VERSION_GAME"
+	_PRINT_BAR
+	echo -e "HP: ${HP_NOW}/${HP_MAX} (${HP_PERCENT}%) | XP: ${EXPERIENCE}/${NEXT_NIVEL_XP} | NÍVEL: ${NIVEL} | FASE: ${ANDAR} | DIFICULDADE: ${DIFICULDADE}"
+	_PRINT_BAR
 }
 #----------------------------------------------------------------------
 function _CHECK_DEPENDENCIES () {
