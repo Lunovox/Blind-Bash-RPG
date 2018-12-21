@@ -14,6 +14,7 @@ EXPERIENCE=0
 NARRADOR="ATIVADO"
 DIFICULDADE="NORMAL"
 MONSTER_DAMAGE=10
+MONSTER_TYPE=""
 POCOES=0
 HP_MAX=100
 HP_NOW=100
@@ -444,8 +445,9 @@ function _EXPLORAR () {
 #----------------------------------------------------------------------
 function _COMBATER () {
 	_CABECALHO_ROLEPLAY
-
-	NARRA="Um monstro te encontrou."
+	_SORT_MONSTER_TYPE
+	
+	NARRA="Um $MONSTER_TYPE te encontrou."
 	doFala "$NARRA" -p "$NARRA"
 	
 	_CALC_DAMAGE
@@ -481,11 +483,11 @@ function _COMBATER () {
 			elif [ "$op" == "5" ]; then 
 				_CALC_SORT_AWAY
 				if [[ $ANDAR -le $SORT_AWAY ]]; then #Falha de Esquiva/Defesa
-					NARRA="$NOME tenta escapar do monstro, mas..."
+					NARRA="$NOME tenta escapar do $MONSTER_TYPE, mas..."
 					doFala "$NARRA" -p "$NARRA"
 					_MONSTER_ATACK
 				else
-					NARRA="Você se aproveita uma destração do monstro,"
+					NARRA="Você se aproveita uma destração do $MONSTER_TYPE,"
 					NARRA="$NARRA e consegue escapar pelos corredores escuros."
 					doFala "$NARRA" -p "$NARRA"
 					break
@@ -504,7 +506,7 @@ function _COMBATER () {
 #----------------------------------------------------------------------
 function _PLAYER_ATACK () {
 	let HP_MONSTER="$HP_MONSTER - 10"
-	NARRA="Você desfere um ataque contra o Monstro."
+	NARRA="Você desfere um ataque contra o $MONSTER_TYPE."
 	#NARRA="$NARRA Retirando ${MONSTER_DAMAGE} de dano."
 	if [[ $HP_MONSTER -gt 0 ]]; then 
 		let HP_MONS_PERCENT="$HP_MONSTER * 100 / $HP_MONSTER_MAX"
@@ -516,7 +518,7 @@ function _PLAYER_ATACK () {
 }
 #----------------------------------------------------------------------
 function _MONSTER_KILLED () {
-	NARRA="Você mata o monstro!"
+	NARRA="Você mata o $MONSTER_TYPE!"
 	doFala "$NARRA" -p "$NARRA"
 
 	let EXPERIENCE="$EXPERIENCE + $ANDAR"
@@ -543,12 +545,12 @@ function _MONSTER_ATACK () {
 	let HP_NOW="$HP_NOW - ($MONSTER_DAMAGE * $ANDAR)"
 	let HP_PERCENT="$HP_NOW * 100 / $HP_MAX"
 	if [[ $HP_NOW -gt 0 ]]; then
-		NARRA="O Monstro desfere um ataque contra você."
+		NARRA="O $MONSTER_TYPE desfere um ataque contra você."
 		NARRA="$NARRA Retirando ${DANO_PERCENT}% de sua saúde,"
 		NARRA="$NARRA que agora está em ${HP_PERCENT}%!"
 		doFala "$NARRA" -p "$NARRA"
 	else
-		NARRA="O Monstro desfere um ataque contra você."
+		NARRA="O $MONSTER_TYPE desfere um ataque contra você."
 		NARRA="$NARRA Te desacordando..."
 		doFala "$NARRA" -p "$NARRA"
 		HP_MONSTER=0 
@@ -559,7 +561,7 @@ function _MONSTER_ATACK () {
 function _PLAYER_DEFEND () {
 	SORT_DEFEND=$(($RANDOM % $NIVEL))
 	if [[ $ANDAR -le $SORT_DEFEND ]]; then #Falha de Esquiva/Defesa
-		NARRA="$NOME tenta bloquear do ataque do monstro, mas..."
+		NARRA="$NOME tenta bloquear do ataque do $MONSTER_TYPE, mas..."
 		doFala "$NARRA" -p "$NARRA"
 	fi
 }
@@ -567,13 +569,30 @@ function _PLAYER_DEFEND () {
 function _PLAYER_DODGE () {
 	SORT_DEFEND=$(($RANDOM % $NIVEL))
 	if [[ $ANDAR -le $SORT_DEFEND ]]; then #Falha de Esquiva/Defesa
-		NARRA="$NOME tenta desviar do ataque do monstro, mas..."
+		NARRA="$NOME tenta desviar do ataque do $MONSTER_TYPE, mas..."
 		doFala "$NARRA" -p "$NARRA"
 		_MONSTER_ATACK
 	else
-		NARRA="Você consegue desviar do ataque do monstro. contra-ataca..."
+		NARRA="Você consegue desviar do ataque do $MONSTER_TYPE. contra-ataca..."
 		doFala "$NARRA" -p "$NARRA"
 		_PLAYER_ATACK
+	fi
+}
+#----------------------------------------------------------------------
+function _SORT_MONSTER_TYPE () {
+	SORT_TYPE=$(($RANDOM % 5))
+	if [[ $SORT_TYPE -eq 0 ]]; then
+		MONSTER_TYPE="LIMO DE SANGUE"
+	elif [[ $SORT_TYPE -eq 1 ]]; then
+		MONSTER_TYPE="LOBO DAS SOMBRAS"
+	elif [[ $SORT_TYPE -eq 2 ]]; then
+		MONSTER_TYPE="FANTASMA"
+	elif [[ $SORT_TYPE -eq 3 ]]; then
+		MONSTER_TYPE="LOBISOMEM"
+	elif [[ $SORT_TYPE -eq 4 ]]; then
+		MONSTER_TYPE="VAMPIRO"
+	else
+		MONSTER_TYPE="LIMO DE SANGUE"
 	fi
 }
 #----------------------------------------------------------------------
